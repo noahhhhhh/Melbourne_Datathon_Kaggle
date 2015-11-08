@@ -53,4 +53,7 @@ dim(dt1.1)
 # [1] 416113     10
 
 # validate if this dt1.1 is correct, take an ACCOUNT_ID, EVENT_ID and calculate PL, BET_SIZE
+dt1.1[ACCOUNT_ID == 1009306 & EVENT_ID == 101093076 & BID_TYP == "B" & STATUS_ID == "S" & INPLAY_BET == "Y", with = T]$STDEV_BET_SIZE
+sd(dt[ACCOUNT_ID == 1009306 & EVENT_ID == 101093076 & BID_TYP == "B" & STATUS_ID == "S" & INPLAY_BET == "Y", with = T]$BET_SIZE)
+
 # develop new features
