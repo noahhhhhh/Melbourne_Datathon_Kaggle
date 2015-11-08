@@ -5,6 +5,7 @@ setwd("/Volumes/Data Science/Google Drive/data_science_competition/melbourne_dat
 rm(list = ls()); gc()
 load("../Datathon_Full_Dataset/processedData.RData")
 require(data.table)
+require(dplyr)
 #######################################
 ## 1.0 assumption #####################
 #######################################
@@ -75,6 +76,85 @@ dt[which(as.character(dt$EVENT_DT) == "2015-03-19 03:30:00"), EVENT_ID]
 # assumption is right for most of the times
 # THEREFORE, WE CAN ASSUME (COULD BE WRONG, BUT NO HARM TO TRY) THAT THE BIGGEST EVENT_ID IS THE FINAL IN TEST SET
 sort(unique(dt$OFF_DT))
+
+
+# # 1.3 Are ME2ME more likely to win?
+# dtAss3 <- dt %>%
+#     filter(STATUS_ID == "S") %>%
+#     group_by(ACCOUNT_ID, EVENT_ID, BID_TYP) %>%
+#     summarise(PL = sum(PROFIT_LOSS))
+# 
+# # new ME2ME column indicates if a betor put B and L in one EVENT_ID
+# dtAss3[, ME2ME := duplicated(dtAss3[, c("ACCOUNT_ID", "EVENT_ID"), with = F]) | duplicated(dtAss3[, c("ACCOUNT_ID", "EVENT_ID"), with = F], fromLast = T)]
+# 
+# dtAss3 <- dtAss3 %>%
+#     filter(ME2ME == T) %>%
+#     group_by(ACCOUNT_ID, EVENT_ID) %>%
+#     summarise(PL_ME2ME = sum(PL))
+# 
+# # new WIN column indicates if a ME2ME betor won or lost
+# dtAss3[, WIN := ifelse(PL_ME2ME > 0, 1, 0)]
+# 
+# dtAss3stats <- dtAss3 %>%
+#     group_by(EVENT_ID) %>%
+#     summarise(RATE_WIN = sum(WIN) / n())
+# 
+# # t test to see if the RATE_WIN is signifanctly higher than .5, per EVENT_ID
+# 
+# t.test(dtAss3stats$RATE_WIN, rep(.5, dim(dtAss3stats)[1]))
+# # Welch Two Sample t-test
+# # 
+# # data:  dtAss3stats$RATE_WIN and rep(0.5, dim(dtAss3stats)[1])
+# # t = 3.9836, df = 42, p-value = 0.0002645
+# # alternative hypothesis: true difference in means is not equal to 0
+# # 95 percent confidence interval:
+# #     0.02405186 0.07344254
+# # sample estimates:
+# #     mean of x mean of y 
+# # 0.5487472 0.5000000 
+# 
+# # assumption is right, p-value = .0003
+# # THEREFORE, THIS CAN BE USED IN THE THE PREDICTION
+
+# 1.4 in addition to 1.3, how about ME2ME plus IN_PLAY?
+dtAss4 <- dt %>%
+    filter(STATUS_ID == "S") %>%
+    group_by(ACCOUNT_ID, EVENT_ID, BID_TYP, INPLAY_BET) %>%
+    summarise(PL = sum(PROFIT_LOSS))
+
+# new ME2ME column indicates if a betor put B and L in one EVENT_ID
+dtAss4[, ME2ME := duplicated(dtAss4[, c("ACCOUNT_ID", "EVENT_ID", "INPLAY_BET"), with = F]) | duplicated(dtAss4[, c("ACCOUNT_ID", "EVENT_ID", "INPLAY_BET"), with = F], fromLast = T)]
+
+dtAss4 <- dtAss4 %>%
+    filter(ME2ME == T) %>%
+    group_by(ACCOUNT_ID, EVENT_ID, INPLAY_BET) %>%
+    summarise(PL_ME2ME = sum(PL))
+
+dtAss4Stats <-  dtAss4 %>%
+    group_by(ACCOUNT_ID, EVENT_ID) %>%
+    summarise(PL_ME2ME = sum(PL_ME2ME))
+
+dtAss4Stats[, WIN := ifelse(PL_ME2ME > 0, 1, 0)]
+
+dtAss4Stats1 <- dtAss4Stats %>%
+    group_by(ACCOUNT_ID) %>%
+    summarise(RATE_WIN = sum(WIN)/n_distinct(EVENT_ID), NO_WIN = sum(WIN), NO_EVENT = n_distinct(EVENT_ID))
+
+# t test
+hist(dtAss4Stats1$RATE_WIN)
+t.test(dtAss4Stats1$RATE_WIN, rep(.5, dim(dtAss4Stats1)[1]))
+# data:  dtAss4Stats1$RATE_WIN and rep(0.5, dim(dtAss4Stats1)[1])
+# t = 16.772, df = 10625, p-value < 2.2e-16
+# alternative hypothesis: true difference in means is not equal to 0
+# 95 percent confidence interval:
+#     0.04756191 0.06015046
+# sample estimates:
+#     mean of x mean of y 
+# 0.5538562 0.5000000 
+# ME2ME BETORS HAVE MORE CHANCE TO WIN (.553 AS THE RATE OF WIN)
+# NO NEED TO COMPARE INPLAY_BET AS Y IS FAR MORE LARGER THAN N
+
+
 #######################################
 ## 2.0 play around ####################
 #######################################
@@ -120,8 +200,9 @@ ACCOUNT_ID_NEW <- setdiff(unique(test$ACCOUNT_ID), unique(dt$ACCOUNT_ID))
 length(ACCOUNT_ID_NEW)
 # 3169
 
-
-
+# 3.2.4 no. of EVENT_ID
+sort(unique(test$EVENT_ID))
+# 101187238 101187943 101191295
 
 
 
