@@ -57,3 +57,11 @@ dt1.1[ACCOUNT_ID == 1009306 & EVENT_ID == 101093076 & BID_TYP == "B" & STATUS_ID
 sd(dt[ACCOUNT_ID == 1009306 & EVENT_ID == 101093076 & BID_TYP == "B" & STATUS_ID == "S" & INPLAY_BET == "Y", with = T]$BET_SIZE)
 
 # develop new features
+
+
+
+
+
+
+
+

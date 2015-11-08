@@ -14,3 +14,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 3. 13,087 distinct Settled Account IDs in Semi and Final Bonus Features.csv, 3,169 Account IDs are new punters, 7,374 distinct Account IDs in sample submit (a subset of 13,087). 
 4. As the prediction is based on Events, so setting training set to be the prior 40 games from file 1-4, and the later 4 games from file qtr final to be the validating set is a reasonable choice.
 5. We can see from the bonus features that, B and L are hidden by got grouped by, so duplicates were generated. How to utilise this info? without knowing SELECTION_NAME, we cannot directly know who won or lost. However, are this kind of ME2ME more likely to win? **(yes, confirmed in 1_expore.R)** If so, we may predict this kind of user to win!
+
+###Questions
+1. How to split train and test sets in this kind of event baesd dataset?
+Answer: previous 40 as the train set, later 4 as the test set, and sample the users to do cross-validation.
