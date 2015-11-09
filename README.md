@@ -22,6 +22,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 3. **(09/11/15) not done yet -** **TIMES_BEING_EARLY_5%** and **TIMES_BEING_EARLY_10%** would be useful.
   * TIMES_BEING_EARLY_5
   * TIMES_BEING_EARLY_10
+4. **(09/11/15) not done yet -** add the PRICE_TAKEN into the test set (as the previously mentioned, PRICE_TAKEN should be very close to the official odds)
 
 ###Initial Thoughts
 1. **(07/11/15)** Duplicates exist in the bonus features csv due to a mistake. BID_TYP can actually be inferred: B followed by L. This could potentially let us play a trick: we know the results of these 3 games, so with B and L known for some records, we could know if they won or lost (setting them to the maximum or minimum rank). Wait ... WE DONT KNOW SELECTION_NAME.  
