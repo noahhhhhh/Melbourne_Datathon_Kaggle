@@ -13,6 +13,8 @@ str(dtTestFeatures)
 #######################################
 ## 1.0 transform ######################
 #######################################
+# first thing first, remove EVETN_ID 101149752 as this is cancelled, the data is no use for training and testing purpose
+dt <- dt[EVENT_ID != 101149752, with = T]
 # 1.1 reproduce the same format as that in the dtTestFeatures
 dt1.1 <- dt %>%
     group_by(ACCOUNT_ID
@@ -29,6 +31,10 @@ dt1.1 <- dt %>%
 
 # NAs
 apply(dt1.1, 2, function(x) mean(is.na(x)))
+# ACCOUNT_ID          EVENT_ID           BID_TYP         STATUS_ID        INPLAY_BET       PROFIT_LOSS 
+# 0.0000000         0.0000000         0.0000000         0.0000000         0.0000000         0.2983494 
+# TRANSACTION_COUNT      AVG_BET_SIZE      MAX_BET_SIZE      MIN_BET_SIZE    STDEV_BET_SIZE 
+# 0.0000000         0.0000000         0.0000000         0.0000000         0.4062912 
 dt1.1$STDEV_BET_SIZE[is.na(dt1.1$STDEV_BET_SIZE)] <- 0
 dt1.1$PROFIT_LOSS[is.na(dt1.1$PROFIT_LOSS)] <- 0
 
@@ -56,12 +62,69 @@ dim(dt1.1)
 dt1.1[ACCOUNT_ID == 1009306 & EVENT_ID == 101093076 & BID_TYP == "B" & STATUS_ID == "S" & INPLAY_BET == "Y", with = T]$STDEV_BET_SIZE
 sd(dt[ACCOUNT_ID == 1009306 & EVENT_ID == 101093076 & BID_TYP == "B" & STATUS_ID == "S" & INPLAY_BET == "Y", with = T]$BET_SIZE)
 
-# develop new features
+# 2.2 adding new features
+####################
+## EVENT_SEQ #######
+####################
+unique(dt[, c("EVENT_ID", "EVENT_DT", "MATCH"), with = F])[order(EVENT_DT)]
+# EVENT_ID            EVENT_DT                               MATCH
+# 1: 101093194 2015-02-15 01:00:00             South Africa v Zimbabwe 3
+# 2: 101093076 2015-02-15 03:30:00                    India v Pakistan 4
+# 3: 101093312 2015-02-15 10:00:00               Ireland v West Indies 5
+# 4: 101128269 2015-02-16 10:00:00              New Zealand v Scotland 6
+# 5: 101128387 2015-02-18 03:30:00            Bangladesh v Afghanistan 7
+# 6: 101149398 2015-02-18 10:00:00     Zimbabwe v United Arab Emirates 8
+# 7: 101149516 2015-02-20 01:00:00               England v New Zealand 9
+# 8: 101149634 2015-02-20 10:00:00              Pakistan v West Indies 10
+# 9: 101149752 2015-02-21 03:30:00              Australia v Bangladesh 11
+# 10: 101149870 2015-02-21 10:00:00             Sri Lanka v Afghanistan 12
+# 11: 101149988 2015-02-22 03:30:00                South Africa v India 13
+# 12: 101150106 2015-02-22 10:00:00                  England v Scotland 14
+# 13: 101150224 2015-02-24 03:30:00              West Indies v Zimbabwe 15
+# 14: 101150348 2015-02-25 03:30:00      Ireland v United Arab Emirates 16
+# 15: 101150480 2015-02-25 10:00:00              Afghanistan v Scotland 17
+# 16: 101150598 2015-02-26 03:30:00              Sri Lanka v Bangladesh 18
+# 17: 101150716 2015-02-27 03:30:00          South Africa v West Indies 19
+# 18: 101150834 2015-02-28 01:00:00             Australia v New Zealand 20
+# 19: 101150952 2015-02-28 06:30:00        India v United Arab Emirates 21
+# 20: 101151090 2015-02-28 10:00:00                 England v Sri Lanka 22
+# 21: 101151214 2015-03-01 03:30:00                 Pakistan v Zimbabwe 23
+# 22: 101151342 2015-03-03 03:30:00              South Africa v Ireland 24
+# 23: 101151486 2015-03-04 01:00:00     Pakistan v United Arab Emirates 25
+# 24: 101151606 2015-03-04 06:30:00             Australia v Afghanistan 26
+# 25: 101151748 2015-03-04 10:00:00               Bangladesh v Scotland 27
+# 26: 101151878 2015-03-06 06:30:00                 India v West Indies 28
+# 27: 101152014 2015-03-07 01:00:00             South Africa v Pakistan 29
+# 28: 101152132 2015-03-07 03:30:00                  Zimbabwe v Ireland 30
+# 29: 101152275 2015-03-07 10:00:00           New Zealand v Afghanistan 31
+# 30: 101152395 2015-03-08 03:30:00               Australia v Sri Lanka 32
+# 31: 101152576 2015-03-09 03:30:00                England v Bangladesh 33
+# 32: 101152715 2015-03-10 01:00:00                     India v Ireland 34
+# 33: 101152836 2015-03-11 03:30:00                Sri Lanka v Scotland 35
+# 34: 101152954 2015-03-12 01:00:00 South Africa v United Arab Emirates 36
+# 35: 101153072 2015-03-13 01:00:00            Bangladesh v New Zealand 37
+# 36: 101153190 2015-03-13 03:30:00               England v Afghanistan 38
+# 37: 101153308 2015-03-14 01:00:00                    India v Zimbabwe 39
+# 38: 101153426 2015-03-14 03:30:00                Australia v Scotland 40
+# 39: 101153544 2015-03-14 10:00:00  West Indies v United Arab Emirates 41
+# 40: 101153662 2015-03-15 03:30:00                  Pakistan v Ireland 42
+# 41: 101183757 2015-03-18 03:30:00            Sri Lanka v South Africa 43
+# 42: 101183237 2015-03-19 03:30:00                  India v Bangladesh 44
+# 43: 101183885 2015-03-20 03:30:00                Australia v Pakistan 45
+# 44: 101184013 2015-03-21 01:00:00           New Zealand v West Indies 46
+dt_temp <- unique(dt[, c("EVENT_ID", "EVENT_DT", "MATCH"), with = F])[order(EVENT_DT)]
+dt_temp$EVENT_SEQ <- 1:43
+dt_temp <- dt_temp[, c("EVENT_ID", "EVENT_SEQ"), with = F]
+dt1.1 <- merge(dt1.1, dt_temp, by = "EVENT_ID")
 
+####################
+## MED_PRICE_TAKEN #
+####################
+MED_PRICE_TAKEN <- dt %>%
+    filter(STATUS_ID == "S") %>%
+    group_by(EVENT_ID) %>%
+    summarise(MED_PRICE_TAKEN = median(PRICE_TAKEN, na.rm = T))
 
-
-
-
-
+dt1.1 <- merge(dt1.1, MED_PRICE_TAKEN, by = "EVENT_ID", all.x = T)
 
 
