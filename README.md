@@ -22,6 +22,6 @@ The objective is to determine if betting is just guessing, or if past performanc
 
 ###Questions
 1. **(08/11/15)** How to split train and test sets in this kind of event baesd dataset?  
-Answer: **(09/11/15)** previous 40 as the train set, later 4 as the test set, and sample the users to do cross-validation (**confirmed**).
+**(09/11/15)** Answer: previous 40 as the train set, later 4 as the test set, and sample the users to do cross-validation (**confirmed**).
 2. **(08/11/15)** ME2ME more likely to win?  
-Answer: **(08/11/15)** yes, .55 win rate vs .5 and statistically significant (**confirmed**).
+**(08/11/15)** Answer: yes, .55 win rate vs .5 and statistically significant (**confirmed**).
