@@ -9,17 +9,17 @@ We provide the list of Account_IDs to make predictions for, along with some limi
 The objective is to determine if betting is just guessing, or if past performance can be indicative of future performance. We expect this to be very hard, and will be impressed if anyone can come up with an algorithm that is better than a random number generator!  
 
 ###Todo/Memo
-1. **(09/11/15)** As the features are accumulated, needs to give an EVENT_SEQ to each game based on the MATCH (EVENT_ID does not alway reflect the sequence).
+1. **(09/11/15) not done yet -** As the features are accumulated, needs to give an EVENT_SEQ to each game based on the MATCH (EVENT_ID does not alway reflect the sequence).
 
 ###Feature Engineering
-1. **(09/11/15)** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES** (**not done yet**).
+1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
   * IS_CHINESE & IS_JAPANESE
   * TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS & TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS
   * TIMES_PREV_BET_ON_CHINA_GAMES & TIMES_PREV_BET_ON_JAPAN_AND_WON
-2. **(09/11/15)** Since ME2ME is a good indicator, then **TIMES_BEING_A_ME2ME** and **IS_ME2ME** would be useful (**not done yet**).
+2. **(09/11/15) not done yet -** Since ME2ME is a good indicator, then **TIMES_BEING_A_ME2ME** and **IS_ME2ME** would be useful.
   * TIMES_BEING_A_ME2ME
   * IS_ME2ME
-3. **(09/11/15)** **TIMES_BEING_EARLY_5%** and **TIMES_BEING_EARLY_10%** would be useful (**not done yet**).
+3. **(09/11/15) not done yet -** **TIMES_BEING_EARLY_5%** and **TIMES_BEING_EARLY_10%** would be useful.
   * TIMES_BEING_EARLY_5
   * TIMES_BEING_EARLY_10
 
@@ -33,9 +33,9 @@ The objective is to determine if betting is just guessing, or if past performanc
 
 ###Questions
 1. **(07/11/15)** EVENT_ID relfects the event sequence?
-  * **(07/11/15)** Answer: no, but most of the times they do (**confirmed**).
+  * **(07/11/15) confirmed -** Answer: no, but most of the times they do.
 2. **(08/11/15)** How to split train and test sets in this kind of event baesd dataset?  
-  * **(09/11/15)** Answer: previous 40 as the train set, later 4 as the test set, and sample the users to do cross-validation (**confirmed**).
+  * **(09/11/15) confirmed -** Answer: previous 40 as the train set, later 4 as the test set, and sample the users to do cross-validation.
 3. **(08/11/15)** ME2ME more likely to win?  
-  * **(08/11/15)** Answer: yes, .55 win rate vs .5 and statistically significant (**confirmed**).
+  * **(08/11/15) confirmed -** Answer: yes, .55 win rate vs .5 and statistically significant.
 4. **(09/11/15)** Are early betors more likely to win?
