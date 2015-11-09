@@ -8,7 +8,7 @@ We provide the list of Account_IDs to make predictions for, along with some limi
 
 The objective is to determine if betting is just guessing, or if past performance can be indicative of future performance. We expect this to be very hard, and will be impressed if anyone can come up with an algorithm that is better than a random number generator!  
 
-###TODO/MEMO
+###Todo/Memo
 1. **(09/11/15)** As the features are accumulated, needs to give an EVENT_SEQ to each game based on the MATCH (EVENT_ID does not alway reflect the sequence).
 
 ###Feature Engineering
