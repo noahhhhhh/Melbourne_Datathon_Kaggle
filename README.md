@@ -21,7 +21,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 2. **(09/11/15)** Since ME2ME is a good indicator, then **TIMES_BEING_A_ME2ME** and **IS_ME2ME** would be useful.
 
 ###Questions
-1. **(08/11/15)** How to split train and test sets in this kind of event baesd dataset?
+1. **(08/11/15)** How to split train and test sets in this kind of event baesd dataset?  
 Answer: **(09/11/15)** previous 40 as the train set, later 4 as the test set, and sample the users to do cross-validation (**confirmed**).
-2. **(08/11/15)** ME2ME more likely to win?
+2. **(08/11/15)** ME2ME more likely to win?  
 Answer: **(08/11/15)** yes, .55 win rate vs .5 and statistically significant (**confirmed**).
