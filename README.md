@@ -12,7 +12,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 1. **(09/11/15) DONE -** As the features are accumulated, needs to give an EVENT_SEQ to each game based on the MATCH (EVENT_ID does not alway reflect the sequence).
 2. **(10/11/15) DONE -** Remove MED_PRICE_TAKEN as the offical odds of Win/Lose/Draw of each EVENT_ID makes more sense.
 3. **(10/11/15) DONE -** Add the offical odds of Win/Lose of each EVENT_ID.
-4. **(10/11/15) not done yet -** Add the event result, RESULT (Suprised, As Expected).
+4. **(10/11/15) DONE -** Add the event result, RESULT (Suprised, As Expected).
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
@@ -26,10 +26,10 @@ The objective is to determine if betting is just guessing, or if past performanc
   * TIMES_BEING_EARLY_5
   * TIMES_BEING_EARLY_10
 4. **(09/11/15) DONE -** add the PRICE_TAKEN into the test set (as the previously mentioned, PRICE_TAKEN should be very close to the official odds) **(SHOULD BE REMOVED AS NOT REASONABLE)**.
-5. **(10/11/15) not done yet -** Since we are predicting P/L and PRICE_TAKEN is said to be close to the official Odds, then add **ODDS_WIN**, **ODDS_LOSE** must be useful.
+5. **(10/11/15) DONE -** Since we are predicting P/L and PRICE_TAKEN is said to be close to the official Odds, then add **ODDS_WIN**, **ODDS_LOSE** must be useful.
   * ODDS_WIN
   * ODDS_LOSE
-6. **(10/11/15) not done yet -** is the result of EVENT useful?
+6. **(10/11/15) DONE -** is the result of EVENT useful?
 
 ###Initial Thoughts
 1. **(07/11/15)** Duplicates exist in the bonus features csv due to a mistake. BID_TYP can actually be inferred: B followed by L. This could potentially let us play a trick: we know the results of these 3 games, so with B and L known for some records, we could know if they won or lost (setting them to the maximum or minimum rank). Wait ... WE DONT KNOW SELECTION_NAME.  

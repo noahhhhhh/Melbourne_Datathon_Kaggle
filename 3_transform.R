@@ -117,6 +117,10 @@ dt_temp$EVENT_SEQ <- 1:43
 dt_temp <- dt_temp[, c("EVENT_ID", "EVENT_SEQ"), with = F]
 dt1.1 <- merge(dt1.1, dt_temp, by = "EVENT_ID")
 
+# add it to the dtTestFeatures
+test_seq <- data.table(EVENT_ID = sort(unique(dtTestFeatures$EVENT_ID)), EVENT_SEQ = 44:46)
+dtTestFeatures <- merge(dtTestFeatures, test_seq, by = "EVENT_ID")
+
 ####################
 ## MED_PRICE_TAKEN #
 ####################
@@ -219,16 +223,68 @@ ODDS_2 <- c(3.68
             , 2.45
             , 12.58)
 
-ODDS <- data.table(EVENT_SEQ = 1:43, ODDS_1 = ODDS_1, ODDS_2 = ODDS_2)
-merge(dt1.1, ODDS, by = "EVENT_SEQ")
+ODDS <- data.table(EVENT_SEQ = 43:1, ODDS_1 = ODDS_1, ODDS_2 = ODDS_2)
+dt1.1 <- merge(dt1.1, ODDS, by = "EVENT_SEQ")
 
+# add them to the dtTestFeatures
+test_odds_1 <- c(2.88, 1.38, 2.10)
+test_odds_2 <- c(1.44, 3.08, 1.75)
+test_odds <- data.table(EVENT_SEQ = 46:44, ODDS_1 = test_odds_1, ODDS_2 = test_odds_2)
+dtTestFeatures <- merge(dtTestFeatures, test_odds, by = "EVENT_SEQ")
+####################
+## RESULT ##########
+####################
+RESULT <- c("AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "SUPRISED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "SUPRISED"
+            , "SUPRISED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "SUPRISED"
+            , "AS_EXPECTED"
+            , "SUPRISED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "SUPRISED"
+            , "AS_EXPECTED"
+            , "SUPRISED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED"
+            , "SUPRISED"
+            , "AS_EXPECTED"
+            , "AS_EXPECTED")
 
+RESULT <- data.table(EVENT_SEQ = 43:1, RESULT = RESULT)
+dt1.1 <- merge(dt1.1, RESULT, by = "EVENT_SEQ")
 
-
-
-
-
-
+# add it to the dtTestFeatures
+test_result <- c("AS_EXPECTED", "AS_EXPECTED", "SUPRISED")
+test_result <- data.table(EVENT_SEQ = 46:44, RESULT = test_result)
+dtTestFeatures <- merge(dtTestFeatures, test_result, by = "EVENT_SEQ")
 
 
 
