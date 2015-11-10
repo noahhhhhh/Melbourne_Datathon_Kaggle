@@ -10,8 +10,8 @@ The objective is to determine if betting is just guessing, or if past performanc
 
 ###Todo/Memo
 1. **(09/11/15) DONE -** As the features are accumulated, needs to give an EVENT_SEQ to each game based on the MATCH (EVENT_ID does not alway reflect the sequence).
-2. **(10/11/15) not done yet -** Remove MED_PRICE_TAKEN as the offical odds of Win/Lose/Draw of each EVENT_ID makes more sense.
-3. **(10/11/15) not done yet -** Add the offical odds of Win/Lose/Draw of each EVENT_ID.
+2. **(10/11/15) DONE -** Remove MED_PRICE_TAKEN as the offical odds of Win/Lose/Draw of each EVENT_ID makes more sense.
+3. **(10/11/15) DONE -** Add the offical odds of Win/Lose of each EVENT_ID.
 4. **(10/11/15) not done yet -** Add the event result, RESULT (Suprised, As Expected).
 
 ###Feature Engineering
@@ -26,10 +26,9 @@ The objective is to determine if betting is just guessing, or if past performanc
   * TIMES_BEING_EARLY_5
   * TIMES_BEING_EARLY_10
 4. **(09/11/15) DONE -** add the PRICE_TAKEN into the test set (as the previously mentioned, PRICE_TAKEN should be very close to the official odds) **(SHOULD BE REMOVED AS NOT REASONABLE)**.
-5. **(10/11/15) not done yet -** Since we are predicting P/L and PRICE_TAKEN is said to be close to the official Odds, then add **ODDS_WIN**, **ODDS_LOSE**, **ODDS_DRAW** must be useful.
+5. **(10/11/15) not done yet -** Since we are predicting P/L and PRICE_TAKEN is said to be close to the official Odds, then add **ODDS_WIN**, **ODDS_LOSE** must be useful.
   * ODDS_WIN
   * ODDS_LOSE
-  * ODDS_DRAW
 6. **(10/11/15) not done yet -** is the result of EVENT useful?
 
 ###Initial Thoughts
@@ -39,7 +38,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 4. **(08/11/15)** We can see from the bonus features that, B and L are hidden by got grouped by, so duplicates were generated. How to utilise this info? without knowing SELECTION_NAME, we cannot directly know who won or lost. But, ME2ME are more likely to win .55 win rate vs .5 and statistically significant. We may predict this kind of user to win!
 5. **(09/11/15)** As the prediction is based on Events, so setting training set to be the prior 40 games from file 1-4, and the later 4 games from file qtr final to be the validating set is a reasonable choice.
 6. **(09/11/15)** Thanks to Ivan in confirming the below scenarios: I won in the 1st game, lost in the 2nd, and the result of 3rd is unknown. If there is a WINRATE feature, and if I want to use the 1st game to predict the 2nd, then WINRATE = 1; If I want to use 1st and 2nd game to predict 3rd, then WINRATE = .5.
-7. **(10/11/15)** Adding PRICE_TAKEN to the bonus feature is a good move, but, not sufficient as you do not know "B" and "L". 3 types of PRICE_TAKEN are there, for Win, for Lose, and for Draw. They all share the parameter, probability of win/lose/draw. It is said they are close to the official odds, so we can add the official odds of Win/Lose/Draw into each game and hide the "B" and "L". Good idea! then do you need MED_PRICE_TAKEN now? no, as we cannot have it in the bonus feature.
+7. **(10/11/15)** Adding PRICE_TAKEN to the bonus feature is a good move, but, not sufficient as you do not know "B" and "L". 3 types of PRICE_TAKEN are there, for Win, for Lose, and for Draw. They all share the parameter, probability of win/lose. It is said they are close to the official odds, so we can add the official odds of Win/Lose/Draw into each game and hide the "B" and "L". Good idea! then do you need MED_PRICE_TAKEN now? no, as we cannot have it in the bonus feature.
 8. **(10/11/15)** Use the similar EVENT as testing set when validating model would be useful, We can compare the odds to find similar EVENTS.
 
 ###Questions
