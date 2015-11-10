@@ -10,6 +10,8 @@ The objective is to determine if betting is just guessing, or if past performanc
 
 ###Todo/Memo
 1. **(09/11/15) DONE -** As the features are accumulated, needs to give an EVENT_SEQ to each game based on the MATCH (EVENT_ID does not alway reflect the sequence).
+2. **(10/11/15) not done yet -** Remove MED_PRICE_TAKEN as the offical odds of Win/Lose/Draw of each EVENT_ID makes more sense.
+3. **(10/11/15) not done yet -** Add the offical odds of Win/Lose/Draw of each EVENT_ID.
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
@@ -22,7 +24,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 3. **(09/11/15) not done yet -** **TIMES_BEING_EARLY_5%** and **TIMES_BEING_EARLY_10%** would be useful.
   * TIMES_BEING_EARLY_5
   * TIMES_BEING_EARLY_10
-4. **(09/11/15) DONE -** add the PRICE_TAKEN into the test set (as the previously mentioned, PRICE_TAKEN should be very close to the official odds)
+4. **(09/11/15) DONE -** add the PRICE_TAKEN into the test set (as the previously mentioned, PRICE_TAKEN should be very close to the official odds) **(SHOULD BE REMOVED AS NOT REASONABLE)**
 
 ###Initial Thoughts
 1. **(07/11/15)** Duplicates exist in the bonus features csv due to a mistake. BID_TYP can actually be inferred: B followed by L. This could potentially let us play a trick: we know the results of these 3 games, so with B and L known for some records, we could know if they won or lost (setting them to the maximum or minimum rank). Wait ... WE DONT KNOW SELECTION_NAME.  
@@ -31,6 +33,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 4. **(08/11/15)** We can see from the bonus features that, B and L are hidden by got grouped by, so duplicates were generated. How to utilise this info? without knowing SELECTION_NAME, we cannot directly know who won or lost. But, ME2ME are more likely to win .55 win rate vs .5 and statistically significant. We may predict this kind of user to win!
 5. **(09/11/15)** As the prediction is based on Events, so setting training set to be the prior 40 games from file 1-4, and the later 4 games from file qtr final to be the validating set is a reasonable choice.
 6. **(09/11/15)** Thanks to Ivan in confirming the below scenarios: I won in the 1st game, lost in the 2nd, and the result of 3rd is unknown. If there is a WINRATE feature, and if I want to use the 1st game to predict the 2nd, then WINRATE = 1; If I want to use 1st and 2nd game to predict 3rd, then WINRATE = .5.
+7. **(10/11/15)** Adding PRICE_TAKEN to the bonus feature is a good move, but, not sufficient as you do not know "B" and "L". 3 types of PRICE_TAKEN are there, for Win, for Lose, and for Draw. They all share the parameter, probability of win/lose/draw. It is said they are close to the official odds, so we can add the official odds of Win/Lose/Draw into each game and hide the "B" and "L". Good idea! then do you need MED_PRICE_TAKEN now? no, as we cannot have it in the bonus feature.
 
 ###Questions
 1. **(07/11/15)** EVENT_ID relfects the event sequence?
