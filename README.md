@@ -12,6 +12,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 1. **(09/11/15) DONE -** As the features are accumulated, needs to give an EVENT_SEQ to each game based on the MATCH (EVENT_ID does not alway reflect the sequence).
 2. **(10/11/15) not done yet -** Remove MED_PRICE_TAKEN as the offical odds of Win/Lose/Draw of each EVENT_ID makes more sense.
 3. **(10/11/15) not done yet -** Add the offical odds of Win/Lose/Draw of each EVENT_ID.
+4. **(10/11/15) not done yet -** Add the event result, RESULT (Suprised, As Expected).
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
@@ -24,7 +25,12 @@ The objective is to determine if betting is just guessing, or if past performanc
 3. **(09/11/15) not done yet -** **TIMES_BEING_EARLY_5%** and **TIMES_BEING_EARLY_10%** would be useful.
   * TIMES_BEING_EARLY_5
   * TIMES_BEING_EARLY_10
-4. **(09/11/15) DONE -** add the PRICE_TAKEN into the test set (as the previously mentioned, PRICE_TAKEN should be very close to the official odds) **(SHOULD BE REMOVED AS NOT REASONABLE)**
+4. **(09/11/15) DONE -** add the PRICE_TAKEN into the test set (as the previously mentioned, PRICE_TAKEN should be very close to the official odds) **(SHOULD BE REMOVED AS NOT REASONABLE)**.
+5. **(10/11/15) not done yet -** Since we are predicting P/L and PRICE_TAKEN is said to be close to the official Odds, then add **ODDS_WIN**, **ODDS_LOSE**, **ODDS_DRAW** must be useful.
+  * ODDS_WIN
+  * ODDS_LOSE
+  * ODDS_DRAW
+6. **(10/11/15) not done yet -** is the result of EVENT useful?
 
 ###Initial Thoughts
 1. **(07/11/15)** Duplicates exist in the bonus features csv due to a mistake. BID_TYP can actually be inferred: B followed by L. This could potentially let us play a trick: we know the results of these 3 games, so with B and L known for some records, we could know if they won or lost (setting them to the maximum or minimum rank). Wait ... WE DONT KNOW SELECTION_NAME.  
@@ -46,3 +52,5 @@ The objective is to determine if betting is just guessing, or if past performanc
 5. **(10/11/15)** How to use STATUS_ID "C", "V", etc. in the training of the model?
   * **(10/11/15) confirmed -** According to Ivan, we can move info about "C", "V" to the same row corresponding to ACCOUNT_ID and EVENT_ID. Genius!
 6. **(10/11/15)** Can we assume "B" and "L" in the bonus feature?: Setting Australian Accounts "B", Kiwi Accounts "L", but this action is still subjected to the SELECTION_NAME, meaning we need to assume more scenarios? e.g. Australian Accounts "B" and SELECTION_NAME "Australia", Australian Accoutns "L" and SELECTION_NAME "New Zealand"? It is a bit complicated, but worthy of trying?
+7. **(10/11/15)** Is the result of EVENT useful? 
+  * **(10/11/15) confirmed -** Maybe, but how to represent this feature? we cannot use SELECTION_NAME so something like "AUS_WON?" is not useful. But!!! we have the offical odds, so we can have something like RESULT = "Supprised", "As Expected". For example, if ODDS_WIN is 1.5, and the team won, then it is "As Expected", 1 is a good threshold of deciding the value of RESULT.
