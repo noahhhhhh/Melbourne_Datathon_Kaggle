@@ -40,3 +40,5 @@ The objective is to determine if betting is just guessing, or if past performanc
 3. **(08/11/15)** ME2ME more likely to win?  
   * **(08/11/15) confirmed -** Answer: yes, .55 win rate vs .5 and statistically significant.
 4. **(09/11/15)** Are early betors more likely to win?
+5. **(10/11/15)** How to use STATUS_ID "C", "V", etc. in the training of the model?
+6. **(10/11/15)** Can we assume "B" and "L" in the bonus feature?: Setting Australian Accounts "B", Kiwi Accounts "L", but this action is still subjected to the SELECTION_NAME, meaning we need to assume more scenarios? e.g. Australian Accounts "B" and SELECTION_NAME "Australia", Australian Accoutns "L" and SELECTION_NAME "New Zealand"? It is a bit complicated, but worthy of trying?
