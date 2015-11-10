@@ -56,3 +56,4 @@ The objective is to determine if betting is just guessing, or if past performanc
   * **(10/11/15) confirmed -** Maybe, but how to represent this feature? we cannot use SELECTION_NAME so something like "AUS_WON?" is not useful. But!!! we have the offical odds, so we can have something like RESULT = "Supprised", "As Expected". For example, if ODDS_WIN is 1.5, and the team won, then it is "As Expected", 1 is a good threshold of deciding the value of RESULT.
 8. **(10/11/15)** Use the similar EVENT as testing set when validating model would be useful?
   * **(10/11/15) confirmed -** We can compare the odds to find similar EVENTS
+9. **(10/11/15)** Do Austrlian prefer to bet on Australia win? If so, does it apply to other countries?
