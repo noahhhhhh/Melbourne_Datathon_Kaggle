@@ -15,28 +15,66 @@ str(dtTestFeatures)
 #######################################
 # first thing first, remove EVETN_ID 101149752 as this is cancelled, the data is no use for training and testing purpose
 dt <- dt[EVENT_ID != 101149752, with = T]
+# try only consider the S transactions
+dt <- dt[STATUS_ID == "S", with = T]
 # 1.1 reproduce the same format as that in the dtTestFeatures
 dt1.1 <- dt %>%
     group_by(ACCOUNT_ID
              , EVENT_ID
-             , BID_TYP
-             , STATUS_ID
-             , INPLAY_BET) %>%
+             # , BID_TYP # B, L
+             # , INPLAY_BET # Y, N
+             ) %>%
     summarise(PROFIT_LOSS = sum(PROFIT_LOSS)
               , TRANSACTION_COUNT = n()
               , AVG_BET_SIZE = mean(BET_SIZE)
               , MAX_BET_SIZE = max(BET_SIZE)
               , MIN_BET_SIZE = min(BET_SIZE)
-              , STDEV_BET_SIZE = sd(BET_SIZE))
+              , STDEV_BET_SIZE = sd(BET_SIZE)
+              
+              , AVG_BET_SIZE_INPLAY_BET_Y = mean(BET_SIZE[INPLAY_BET == "Y"])
+              , AVG_BET_SIZE_INPLAY_BET_N = mean(BET_SIZE[INPLAY_BET == "N"])
+              , MAX_BET_SIZE_INPLAY_BET_Y = max(BET_SIZE[INPLAY_BET == "Y"])
+              , MAX_BET_SIZE_INPLAY_BET_N = max(BET_SIZE[INPLAY_BET == "N"])
+              , MIN_BET_SIZE_INPLAY_BET_Y = min(BET_SIZE[INPLAY_BET == "Y"])
+              , MIN_BET_SIZE_INPLAY_BET_N = min(BET_SIZE[INPLAY_BET == "N"])
+              , STDEV_BET_SIZE_INPLAY_BET_Y = sd(BET_SIZE[INPLAY_BET == "Y"])
+              , STDEV_BET_SIZE_INPLAY_BET_N = sd(BET_SIZE[INPLAY_BET == "N"])
+              
+              , NO_OF_BID_TYPE = n_distinct(BID_TYP)
+              , NO_OF_INPLAY_BET = n_distinct(INPLAY_BET))
 
 # NAs
 apply(dt1.1, 2, function(x) mean(is.na(x)))
-# ACCOUNT_ID          EVENT_ID           BID_TYP         STATUS_ID        INPLAY_BET       PROFIT_LOSS 
-# 0.0000000         0.0000000         0.0000000         0.0000000         0.0000000         0.2983494 
-# TRANSACTION_COUNT      AVG_BET_SIZE      MAX_BET_SIZE      MIN_BET_SIZE    STDEV_BET_SIZE 
-# 0.0000000         0.0000000         0.0000000         0.0000000         0.4062912 
+# ACCOUNT_ID                    EVENT_ID                 PROFIT_LOSS           TRANSACTION_COUNT 
+# 0.0000000                   0.0000000                   0.0000000                   0.0000000 
+# AVG_BET_SIZE                MAX_BET_SIZE                MIN_BET_SIZE              STDEV_BET_SIZE 
+# 0.0000000                   0.0000000                   0.0000000                   0.2934235 
+# AVG_BET_SIZE_INPLAY_BET_Y   AVG_BET_SIZE_INPLAY_BET_N   MAX_BET_SIZE_INPLAY_BET_Y   MAX_BET_SIZE_INPLAY_BET_N 
+# 0.1904940                   0.6216351                   0.0000000                   0.0000000 
+# MIN_BET_SIZE_INPLAY_BET_Y   MIN_BET_SIZE_INPLAY_BET_N STDEV_BET_SIZE_INPLAY_BET_Y STDEV_BET_SIZE_INPLAY_BET_N 
+# 0.0000000                   0.0000000                   0.3833527                   0.8578570 
+# NO_OF_BID_TYPE            NO_OF_INPLAY_BET 
+# 0.0000000                   0.0000000 
 dt1.1$STDEV_BET_SIZE[is.na(dt1.1$STDEV_BET_SIZE)] <- 0
+dt1.1$AVG_BET_SIZE_INPLAY_BET_Y[is.na(dt1.1$AVG_BET_SIZE_INPLAY_BET_Y)] <- 0
+dt1.1$AVG_BET_SIZE_INPLAY_BET_N[is.na(dt1.1$AVG_BET_SIZE_INPLAY_BET_N)] <- 0
+dt1.1$MAX_BET_SIZE_INPLAY_BET_Y[is.na(dt1.1$MAX_BET_SIZE_INPLAY_BET_Y)] <- 0
+dt1.1$MAX_BET_SIZE_INPLAY_BET_N[is.na(dt1.1$MAX_BET_SIZE_INPLAY_BET_N)] <- 0
+dt1.1$MIN_BET_SIZE_INPLAY_BET_Y[is.na(dt1.1$MIN_BET_SIZE_INPLAY_BET_Y)] <- 0
+dt1.1$MIN_BET_SIZE_INPLAY_BET_N[is.na(dt1.1$MIN_BET_SIZE_INPLAY_BET_N)] <- 0
+dt1.1$STDEV_BET_SIZE_INPLAY_BET_Y[is.na(dt1.1$STDEV_BET_SIZE_INPLAY_BET_Y)] <- 0
+dt1.1$STDEV_BET_SIZE_INPLAY_BET_N[is.na(dt1.1$STDEV_BET_SIZE_INPLAY_BET_N)] <- 0
 dt1.1$PROFIT_LOSS[is.na(dt1.1$PROFIT_LOSS)] <- 0
+
+# Inf, -Inf
+dt1.1$AVG_BET_SIZE_INPLAY_BET_Y[dt1.1$AVG_BET_SIZE_INPLAY_BET_Y %in% c(Inf, -Inf)] <- 0
+dt1.1$AVG_BET_SIZE_INPLAY_BET_N[dt1.1$AVG_BET_SIZE_INPLAY_BET_N %in% c(Inf, -Inf)] <- 0
+dt1.1$MAX_BET_SIZE_INPLAY_BET_Y[dt1.1$MAX_BET_SIZE_INPLAY_BET_Y %in% c(Inf, -Inf)] <- 0
+dt1.1$MAX_BET_SIZE_INPLAY_BET_N[dt1.1$MAX_BET_SIZE_INPLAY_BET_N %in% c(Inf, -Inf)] <- 0
+dt1.1$MIN_BET_SIZE_INPLAY_BET_Y[dt1.1$MIN_BET_SIZE_INPLAY_BET_Y %in% c(Inf, -Inf)] <- 0
+dt1.1$MIN_BET_SIZE_INPLAY_BET_N[dt1.1$MIN_BET_SIZE_INPLAY_BET_N %in% c(Inf, -Inf)] <- 0
+dt1.1$STDEV_BET_SIZE_INPLAY_BET_Y[dt1.1$STDEV_BET_SIZE_INPLAY_BET_Y %in% c(Inf, -Inf)] <- 0
+dt1.1$STDEV_BET_SIZE_INPLAY_BET_N[dt1.1$STDEV_BET_SIZE_INPLAY_BET_N %in% c(Inf, -Inf)] <- 0
 
 dt1.1
 # Source: local data table [416,113 x 11]
@@ -58,11 +96,12 @@ dt1.1
 dim(dt1.1)
 # [1] 416113     10
 
-# validate if this dt1.1 is correct, take an ACCOUNT_ID, EVENT_ID and calculate PL, BET_SIZE
-dt1.1[ACCOUNT_ID == 1009306 & EVENT_ID == 101093076 & BID_TYP == "B" & STATUS_ID == "S" & INPLAY_BET == "Y", with = T]$STDEV_BET_SIZE
-sd(dt[ACCOUNT_ID == 1009306 & EVENT_ID == 101093076 & BID_TYP == "B" & STATUS_ID == "S" & INPLAY_BET == "Y", with = T]$BET_SIZE)
-
 # 2.2 adding new features
+####################
+## ME2ME ###########
+####################
+dt1.1[, ME2ME := ifelse(NO_OF_BID_TYPE == 2, 1, 0)]
+
 ####################
 ## EVENT_SEQ #######
 ####################
@@ -340,3 +379,9 @@ dt1.1 <- merge(dt1.1, SCORE_DIFF, by = "EVENT_SEQ")
 test_score_diff <- c(3, 95, -18)
 test_score_diff <- data.table(EVENT_SEQ = 46:44, SCORE_DIFF = test_score_diff)
 dtTestFeatures <- merge(dtTestFeatures, test_score_diff, by = "EVENT_SEQ")
+
+####################
+## IND_WIN #########
+####################
+dt1.1[, IND_WIN := ifelse(PROFIT_LOSS > 0, 1, 0)]
+
