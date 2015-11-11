@@ -33,7 +33,7 @@ The objective is to determine if betting is just guessing, or if past performanc
   * ODDS_LOSE
 6. **(10/11/15) DONE -** is the **RESULT** of EVENT useful? (SUPRISED and AS_EXPECTED)
   * RESULT
-7. **(11/11/15) not done yet -** how about adding the EVENT SCORE_DIFF? (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff)
+7. **(11/11/15) DONE -** how about adding the EVENT SCORE_DIFF? (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff)
   * SCORE_DIFF
 8. **(11/11/15) not done yet -** **WIN_RATE**.
 9. **(11/11/15) not done yet -** **WIN_LAST_ATTENDED_EVENT**.
