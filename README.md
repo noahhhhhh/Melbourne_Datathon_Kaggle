@@ -55,6 +55,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 6. **(09/11/15)** Thanks to Ivan in confirming the below scenarios: I won in the 1st game, lost in the 2nd, and the result of 3rd is unknown. If there is a WINRATE feature, and if I want to use the 1st game to predict the 2nd, then WINRATE = 1; If I want to use 1st and 2nd game to predict 3rd, then WINRATE = .5.
 7. **(10/11/15)** Adding PRICE_TAKEN to the bonus feature is a good move, but, not sufficient as you do not know "B" and "L". 3 types of PRICE_TAKEN are there, for Win, for Lose, and for Draw. They all share the parameter, probability of win/lose. It is said they are close to the official odds, so we can add the official odds of Win/Lose/Draw into each game and hide the "B" and "L". Good idea! then do you need MED_PRICE_TAKEN now? no, as we cannot have it in the bonus feature.
 8. **(10/11/15)** Use the similar EVENT as testing set when validating model would be useful, We can compare the odds to find similar EVENTS.
+9. **(11/11/15)** Bag and Boosting could be used to stablise the outcome of the model.
 
 ###Questions
 1. **(07/11/15)** EVENT_ID relfects the event sequence?
