@@ -43,6 +43,8 @@ dt1.1 <- dt %>%
               , NO_OF_BID_TYPE = n_distinct(BID_TYP)
               , NO_OF_INPLAY_BET = n_distinct(INPLAY_BET))
 
+dt1.1$INPLAY_BET <- ifelse(dt1.1$MAX_BET_SIZE_INPLAY_BET_Y == -Inf, "N"
+                         , ifelse(dt1.1$MAX_BET_SIZE_INPLAY_BET_N == -Inf, "Y", "YN"))
 # NAs
 apply(dt1.1, 2, function(x) mean(is.na(x)))
 # ACCOUNT_ID                    EVENT_ID                 PROFIT_LOSS           TRANSACTION_COUNT 
