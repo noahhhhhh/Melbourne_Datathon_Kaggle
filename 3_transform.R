@@ -31,6 +31,8 @@ dt1.1 <- dt %>%
               , MIN_BET_SIZE = min(BET_SIZE)
               , STDEV_BET_SIZE = sd(BET_SIZE)
               
+              , TRANSACTION_COUNT_INPLAY_BET_Y = n_distinct(BET_TRANS_ID[INPLAY_BET == "Y"])
+              , TRANSACTION_COUNT_INPLAY_BET_N = n_distinct(BET_TRANS_ID[INPLAY_BET == "N"])
               , AVG_BET_SIZE_INPLAY_BET_Y = mean(BET_SIZE[INPLAY_BET == "Y"])
               , AVG_BET_SIZE_INPLAY_BET_N = mean(BET_SIZE[INPLAY_BET == "N"])
               , MAX_BET_SIZE_INPLAY_BET_Y = max(BET_SIZE[INPLAY_BET == "Y"])
@@ -47,17 +49,22 @@ dt1.1$INPLAY_BET <- ifelse(dt1.1$MAX_BET_SIZE_INPLAY_BET_Y == -Inf, "N"
                          , ifelse(dt1.1$MAX_BET_SIZE_INPLAY_BET_N == -Inf, "Y", "YN"))
 # NAs
 apply(dt1.1, 2, function(x) mean(is.na(x)))
-# ACCOUNT_ID                    EVENT_ID                 PROFIT_LOSS           TRANSACTION_COUNT 
-# 0.0000000                   0.0000000                   0.0000000                   0.0000000 
-# AVG_BET_SIZE                MAX_BET_SIZE                MIN_BET_SIZE              STDEV_BET_SIZE 
-# 0.0000000                   0.0000000                   0.0000000                   0.2934235 
-# AVG_BET_SIZE_INPLAY_BET_Y   AVG_BET_SIZE_INPLAY_BET_N   MAX_BET_SIZE_INPLAY_BET_Y   MAX_BET_SIZE_INPLAY_BET_N 
-# 0.1904940                   0.6216351                   0.0000000                   0.0000000 
-# MIN_BET_SIZE_INPLAY_BET_Y   MIN_BET_SIZE_INPLAY_BET_N STDEV_BET_SIZE_INPLAY_BET_Y STDEV_BET_SIZE_INPLAY_BET_N 
-# 0.0000000                   0.0000000                   0.3833527                   0.8578570 
-# NO_OF_BID_TYPE            NO_OF_INPLAY_BET 
-# 0.0000000                   0.0000000 
+# ACCOUNT_ID                       EVENT_ID                    PROFIT_LOSS 
+# 0.0000000                      0.0000000                      0.0000000 
+# TRANSACTION_COUNT                   AVG_BET_SIZE                   MAX_BET_SIZE 
+# 0.0000000                      0.0000000                      0.0000000 
+# MIN_BET_SIZE                 STDEV_BET_SIZE TRANSACTION_COUNT_INPLAY_BET_Y 
+# 0.0000000                      0.2934235                      0.0000000 
+# TRANSACTION_COUNT_INPLAY_BET_N      AVG_BET_SIZE_INPLAY_BET_Y      AVG_BET_SIZE_INPLAY_BET_N 
+# 0.0000000                      0.1904940                      0.6216351 
+# MAX_BET_SIZE_INPLAY_BET_Y      MAX_BET_SIZE_INPLAY_BET_N      MIN_BET_SIZE_INPLAY_BET_Y 
+# 0.0000000                      0.0000000                      0.0000000 
+#      MIN_BET_SIZE_INPLAY_BET_N    STDEV_BET_SIZE_INPLAY_BET_Y    STDEV_BET_SIZE_INPLAY_BET_N 
+#                      0.0000000                      0.3833527                      0.8578570 
+#                 NO_OF_BID_TYPE               NO_OF_INPLAY_BET 
+#                      0.0000000                      0.0000000 
 dt1.1$STDEV_BET_SIZE[is.na(dt1.1$STDEV_BET_SIZE)] <- 0
+
 dt1.1$AVG_BET_SIZE_INPLAY_BET_Y[is.na(dt1.1$AVG_BET_SIZE_INPLAY_BET_Y)] <- 0
 dt1.1$AVG_BET_SIZE_INPLAY_BET_N[is.na(dt1.1$AVG_BET_SIZE_INPLAY_BET_N)] <- 0
 dt1.1$MAX_BET_SIZE_INPLAY_BET_Y[is.na(dt1.1$MAX_BET_SIZE_INPLAY_BET_Y)] <- 0
