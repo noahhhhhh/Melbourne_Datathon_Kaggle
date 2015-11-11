@@ -13,7 +13,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 2. **(10/11/15) DONE -** Remove MED_PRICE_TAKEN as the offical odds of Win/Lose/Draw of each EVENT_ID makes more sense.
 3. **(10/11/15) DONE -** Add the offical odds of Win/Lose of each EVENT_ID.
 4. **(10/11/15) DONE -** Add the event result, RESULT (Suprised, As Expected).
-5. **(11/11/15) not done yet -** add the EVENT SCORE_DIFF (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff).
+5. **(11/11/15) DONE -** add the EVENT SCORE_DIFF (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff).
 6. **(11/11/15) not done yet -** implement Feature Engineering 8 - 17.
 
 ###Feature Engineering

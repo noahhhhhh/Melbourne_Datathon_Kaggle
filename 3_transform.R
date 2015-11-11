@@ -286,8 +286,57 @@ test_result <- c("AS_EXPECTED", "AS_EXPECTED", "SUPRISED")
 test_result <- data.table(EVENT_SEQ = 46:44, RESULT = test_result)
 dtTestFeatures <- merge(dtTestFeatures, test_result, by = "EVENT_SEQ")
 
+####################
+## SCORE_DIFF ######
+####################
+SCORE_DIFF <- c(abs(393-250),
+                abs(216-213),
+                abs(302-193),
+                abs(134-133),
+                abs(241-237),
+                abs(176-175),
+                abs(133-130),
+                abs(288-287),
+                abs(101-111),
+                abs(288-290),
+                abs(341-195),
+                abs(363-215),
+                abs(260-259),
+                -abs(260-275),
+                abs(376-312),
+                abs(188-186),
+                -abs(326-331),
+                -abs(202-222),
+                abs(185-182),
+                abs(322-318),
+                abs(417-142),
+                abs(339-210),
+                abs(411-210),
+                abs(235-215),
+                -abs(309-312),
+                abs(104-102),
+                -abs(151-152),
+                abs(408-151),
+                abs(332-240),
+                abs(211-210),
+                abs(279-278),
+                abs(372-289),
+                abs(303-184),
+                -abs(177-307),
+                abs(236-232),
+                -abs(160-310),
+                abs(123-125),
+                abs(286-285),
+                abs(267-162),
+                abs(146-142),
+                -abs(304-307),
+                abs(300-224),
+                abs(339-277))
 
+SCORE_DIFF <- data.table(EVENT_SEQ = 43:1, SCORE_DIFF = SCORE_DIFF)
+dt1.1 <- merge(dt1.1, SCORE_DIFF, by = "EVENT_SEQ")
 
-
-
-
+# add it to the dtTestFeatures
+test_score_diff <- c(3, 95, -18)
+test_score_diff <- data.table(EVENT_SEQ = 46:44, SCORE_DIFF = test_score_diff)
+dtTestFeatures <- merge(dtTestFeatures, test_score_diff, by = "EVENT_SEQ")
