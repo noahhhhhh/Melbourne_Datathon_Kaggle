@@ -13,7 +13,8 @@ The objective is to determine if betting is just guessing, or if past performanc
 2. **(10/11/15) DONE -** Remove MED_PRICE_TAKEN as the offical odds of Win/Lose/Draw of each EVENT_ID makes more sense.
 3. **(10/11/15) DONE -** Add the offical odds of Win/Lose of each EVENT_ID.
 4. **(10/11/15) DONE -** Add the event result, RESULT (Suprised, As Expected).
-5. **(11/11/15) not done yet -** add the EVENT SCORE_DIFF (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff)
+5. **(11/11/15) not done yet -** add the EVENT SCORE_DIFF (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff).
+6. **(11/11/15) not done yet -** implement Feature Engineering 8 - 17.
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
@@ -30,8 +31,20 @@ The objective is to determine if betting is just guessing, or if past performanc
 5. **(10/11/15) DONE -** Since we are predicting P/L and PRICE_TAKEN is said to be close to the official Odds, then add **ODDS_WIN**, **ODDS_LOSE** must be useful.
   * ODDS_WIN
   * ODDS_LOSE
-6. **(10/11/15) DONE -** is the result of EVENT useful? (SUPRISED and AS_EXPECTED)
+6. **(10/11/15) DONE -** is the **RESULT** of EVENT useful? (SUPRISED and AS_EXPECTED)
+  * RESULT
 7. **(11/11/15) not done yet -** how about adding the EVENT SCORE_DIFF? (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff)
+  * SCORE_DIFF
+8. **(11/11/15) not done yet -** **WIN_RATE**.
+9. **(11/11/15) not done yet -** **WIN_LAST_ATTENDED_EVENT**.
+10. **(11/11/15) not done yet -** **NO_OF_EVENT_ATTENDED**
+11. **(11/11/15) not done yet -** **NO_OF_EVENT_WON**
+12. **(11/11/15) not done yet -** **NO_OF_EVENT_LOSE**
+13. **(11/11/15) not done yet -** **TTL_PROFIT_LOSS**
+14. **(11/11/15) not done yet -** **MAX_PROFIT_LOSS_PER_EVENT**
+15. **(11/11/15) not done yet -** **MIN_PROFIT_LOSS_PER_EVENT**
+16. **(11/11/15) not done yet -** **AVG_PROFIT_LOSS_PER_EVENT**
+17. **(11/11/15) not done yet -** **AVG_PROFIT_LOSS_LAST_ATTENDED_EVENT**
 
 ###Initial Thoughts
 1. **(07/11/15)** Duplicates exist in the bonus features csv due to a mistake. BID_TYP can actually be inferred: B followed by L. This could potentially let us play a trick: we know the results of these 3 games, so with B and L known for some records, we could know if they won or lost (setting them to the maximum or minimum rank). Wait ... WE DONT KNOW SELECTION_NAME.  
