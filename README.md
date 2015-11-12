@@ -59,6 +59,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 8. **(10/11/15)** Use the similar EVENT as testing set when validating model would be useful, We can compare the odds to find similar EVENTS.
 9. **(11/11/15)** Bag and Boosting could be used to stablise the outcome of the model.
 10. **(11/11/15)** The Lasso to shrink predictors --> SVM --> Bag and Boosting.
+11. **(12/11/15)** **3 EVENTS TO COMBINE INTO 1 EVENT TO TRAIN AND TEST!**
 
 ###Questions
 1. **(07/11/15)** EVENT_ID relfects the event sequence?
