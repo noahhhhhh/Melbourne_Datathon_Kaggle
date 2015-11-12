@@ -14,8 +14,11 @@ The objective is to determine if betting is just guessing, or if past performanc
 3. **(10/11/15) DONE -** Add the offical odds of Win/Lose of each EVENT_ID.
 4. **(10/11/15) DONE -** Add the event result, RESULT (Suprised, As Expected).
 5. **(11/11/15) DONE -** add the EVENT SCORE_DIFF (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff).
-6. **(11/11/15) not done yet -** implement Feature Engineering 8 - 17.
-7. **(12/11/15) not done yet -** start to implement the window function (e.g. dt[, CUMSUM := cumsum(C), by = A]; dt[, LAGCUMSUM := shift(CUMSUM, fill = 0, type = "lag"), by = A]) (pay attention to B's order, this needs to be incremental).
+6. **(11/11/15) half DONE -** implement Feature Engineering 8 - 17.
+7. **(12/11/15) DONE -** start to implement the window function (e.g. dt[, CUMSUM := cumsum(C), by = A]; dt[, LAGCUMSUM := shift(CUMSUM, fill = 0, type = "lag"), by = A]) (pay attention to B's order, this needs to be incremental).
+8. **(13/11/15) not done yet -** IS_FROM_WIN, IS_FROM_LOSE
+9. **(13/11/15) not done yet -** TIMES_BEING_A_ME2ME
+9. **(13/11/15) not done yet -** Transform to 3 EVENTS per UNIT
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
@@ -36,17 +39,17 @@ The objective is to determine if betting is just guessing, or if past performanc
   * RESULT
 7. **(11/11/15) DONE -** how about adding the EVENT SCORE_DIFF? (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff)
   * SCORE_DIFF
-8. **(11/11/15) not done yet -** **WIN_RATE**.
+8. **(11/11/15)DONE -** **WIN_RATE**.
 9. **(11/11/15) not done yet -** **WIN_LAST_ATTENDED_EVENT**.
-10. **(11/11/15) not done yet -** **NO_OF_EVENT_ATTENDED**
-11. **(11/11/15) not done yet -** **NO_OF_EVENT_WON**
-12. **(11/11/15) not done yet -** **NO_OF_EVENT_LOSE**
-13. **(11/11/15) not done yet -** **TTL_PROFIT_LOSS**
+10. **(11/11/15) DONE -** **NO_OF_EVENT_ATTENDED**
+11. **(11/11/15) DONE -** **NO_OF_EVENT_WON**
+12. **(11/11/15) DONE -** **NO_OF_EVENT_LOSE**
+13. **(11/11/15) DONE -** **TTL_PROFIT_LOSS**
 14. **(11/11/15) not done yet -** **MAX_PROFIT_LOSS_PER_EVENT**
 15. **(11/11/15) not done yet -** **MIN_PROFIT_LOSS_PER_EVENT**
 16. **(11/11/15) not done yet -** **AVG_PROFIT_LOSS_PER_EVENT**
 17. **(11/11/15) not done yet -** **AVG_PROFIT_LOSS_LAST_ATTENDED_EVENT**
-18. **(12/11/15) not done yet -** Phil's **WIN_LOSE** (WIN: +1; LOSE: -1)
+18. **(12/11/15) DONE -** Phil's **WIN_LOSE** (WIN: +1; LOSE: -1)
 
 ###Initial Thoughts
 1. **(07/11/15)** Duplicates exist in the bonus features csv due to a mistake. BID_TYP can actually be inferred: B followed by L. This could potentially let us play a trick: we know the results of these 3 games, so with B and L known for some records, we could know if they won or lost (setting them to the maximum or minimum rank). Wait ... WE DONT KNOW SELECTION_NAME.  

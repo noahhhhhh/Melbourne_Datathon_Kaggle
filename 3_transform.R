@@ -3,11 +3,11 @@
 ###########################################################################################
 setwd("/Volumes/Data Science/Google Drive/data_science_competition/melbourne_datathon/Melbourne_Datathon_Kaggle/")
 rm(list = ls()); gc()
+require(data.table)
+require(dplyr)
 load("../Datathon_Full_Dataset/processedData.RData")
 dtTestFeatures <- fread("../data_files/semi_and_final_features.csv")
 dtSampleSubmit <- fread("../data_files/sample_submission_bet_size.csv")
-require(data.table)
-require(dplyr)
 str(dt)
 str(dtTestFeatures)
 #######################################
@@ -20,7 +20,9 @@ dt <- dt[STATUS_ID == "S", with = T]
 # 1.1 reproduce the same format as that in the dtTestFeatures
 dt1.1 <- dt %>%
     group_by(ACCOUNT_ID
+             , COUNTRY_OF_RESIDENCE_NAME
              , EVENT_ID
+             , MATCH
              # , BID_TYP # B, L
              # , INPLAY_BET # Y, N
              ) %>%
@@ -393,4 +395,55 @@ dtTestFeatures <- merge(dtTestFeatures, test_score_diff, by = "EVENT_SEQ")
 ## IND_WIN #########
 ####################
 dt1.1[, IND_WIN := ifelse(PROFIT_LOSS > 0, 1, 0)]
+
+####################
+## IND_LOSE ########
+####################
+dt1.1[, IND_LOSE := ifelse(PROFIT_LOSS <= 0, -1, 0)]
+
+####################
+## NO_OF_EVENT_ATTENDED
+####################
+dt1.1[, ATTENDED := 1]
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, CUM_ATTENDED := cumsum(ATTENDED), by = ACCOUNT_ID]
+dt1.1[, NO_OF_EVENT_ATTENDED := shift(CUM_ATTENDED, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## NO_OF_WIN #######
+####################
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, CUM_WIN := cumsum(IND_WIN), by = ACCOUNT_ID]
+dt1.1[, NO_OF_WIN := shift(CUM_WIN, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## NO_OF_LOSE ######
+####################
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, CUM_LOSE := cumsum(IND_LOSE), by = ACCOUNT_ID]
+dt1.1[, NO_OF_LOSE := shift(CUM_LOSE, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## RATE_WIN ########
+####################
+dt1.1[, RATE_WIN := NO_OF_WIN / NO_OF_EVENT_ATTENDED]
+dt1.1$RATE_WIN[is.nan(dt1.1$RATE_WIN)] <- 0
+
+####################
+## WIN_LOSE ########
+####################
+dt1.1[, WIN_LOSE := CUM_WIN + CUM_LOSE]
+
+####################
+## TTL_PROFIT_LOSS #
+####################
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, CUM_PROFIT_LOSS := cumsum(PROFIT_LOSS), by = ACCOUNT_ID]
+dt1.1[, TTL_PROFIT_LOSS := shift(CUM_PROFIT_LOSS, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+
+
+
+
+
 
