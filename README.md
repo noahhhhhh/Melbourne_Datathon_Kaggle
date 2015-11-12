@@ -15,6 +15,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 4. **(10/11/15) DONE -** Add the event result, RESULT (Suprised, As Expected).
 5. **(11/11/15) DONE -** add the EVENT SCORE_DIFF (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff).
 6. **(11/11/15) not done yet -** implement Feature Engineering 8 - 17.
+7. **(12/11/15) not done yet -** start to implement the window function (e.g. dt[, CUMSUM := cumsum(C), by = A]; dt[, LAGCUMSUM := shift(CUMSUM, fill = 0, type = "lag"), by = A]).
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
