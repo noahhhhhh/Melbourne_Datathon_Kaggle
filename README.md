@@ -18,8 +18,9 @@ The objective is to determine if betting is just guessing, or if past performanc
 7. **(12/11/15) DONE -** start to implement the window function (e.g. dt[, CUMSUM := cumsum(C), by = A]; dt[, LAGCUMSUM := shift(CUMSUM, fill = 0, type = "lag"), by = A]) (pay attention to B's order, this needs to be incremental).
 8. **(13/11/15) not done yet -** IS_FROM_WIN, IS_FROM_LOSE
 9. **(13/11/15) not done yet -** TIMES_BEING_A_ME2ME
-10. **(13/11/15) not done yet -** Transform to 3 EVENTS per UNIT.
-(e.g. dt <- data.table()  
+10. **(13/11/15) not done yet -** Transform to 3 EVENTS per UNIT.  
+(e.g.  
+dt <- data.table()  
 for (i in 1:5){  
     i.consecutive <- c(i, i+1, i+2)  
     dt_temp <- dt1[B %in% i.consecutive, with = T]  
