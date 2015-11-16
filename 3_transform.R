@@ -5,6 +5,7 @@ setwd("/Volumes/Data Science/Google Drive/data_science_competition/melbourne_dat
 rm(list = ls()); gc()
 require(data.table)
 require(dplyr)
+require(stringr)
 load("../Datathon_Full_Dataset/processedData.RData")
 dtTestFeatures <- fread("../data_files/semi_and_final_features.csv")
 dtSampleSubmit <- fread("../data_files/sample_submission_bet_size.csv")
@@ -46,6 +47,40 @@ dt1.1 <- dt %>%
               
               , NO_OF_BID_TYPE = n_distinct(BID_TYP)
               , NO_OF_INPLAY_BET = n_distinct(INPLAY_BET))
+
+# modify dtTestFeatures
+setnames(dtTestFeatures, names(dtTestFeatures), c("ACCOUNT_ID", names(dtTestFeatures)[-1]))
+dtTempCountry <- unique(dt[, c("ACCOUNT_ID", "COUNTRY_OF_RESIDENCE_NAME"), with = F])
+# dtTestFeatures <- merge(dtTestFeatures, dtTestFeatures, by = "ACCOUNT_ID", all.x = T)
+
+# dtTest <- dtTestFeatures %>%
+#     group_by(ACCOUNT_ID
+#              , COUNTRY_OF_RESIDENCE_NAME
+#              , EVENT_ID
+#              , MATCH
+#              # , BID_TYP # B, L
+#              # , INPLAY_BET # Y, N
+#     ) %>%
+#     summarise(PROFIT_LOSS = sum(PROFIT_LOSS)
+#               , TRANSACTION_COUNT = n()
+#               , AVG_BET_SIZE = mean(BET_SIZE)
+#               , MAX_BET_SIZE = max(BET_SIZE)
+#               , MIN_BET_SIZE = min(BET_SIZE)
+#               , STDEV_BET_SIZE = sd(BET_SIZE)
+#               
+#               , TRANSACTION_COUNT_INPLAY_BET_Y = n_distinct(BET_TRANS_ID[INPLAY_BET == "Y"])
+#               , TRANSACTION_COUNT_INPLAY_BET_N = n_distinct(BET_TRANS_ID[INPLAY_BET == "N"])
+#               , AVG_BET_SIZE_INPLAY_BET_Y = mean(BET_SIZE[INPLAY_BET == "Y"])
+#               , AVG_BET_SIZE_INPLAY_BET_N = mean(BET_SIZE[INPLAY_BET == "N"])
+#               , MAX_BET_SIZE_INPLAY_BET_Y = max(BET_SIZE[INPLAY_BET == "Y"])
+#               , MAX_BET_SIZE_INPLAY_BET_N = max(BET_SIZE[INPLAY_BET == "N"])
+#               , MIN_BET_SIZE_INPLAY_BET_Y = min(BET_SIZE[INPLAY_BET == "Y"])
+#               , MIN_BET_SIZE_INPLAY_BET_N = min(BET_SIZE[INPLAY_BET == "N"])
+#               , STDEV_BET_SIZE_INPLAY_BET_Y = sd(BET_SIZE[INPLAY_BET == "Y"])
+#               , STDEV_BET_SIZE_INPLAY_BET_N = sd(BET_SIZE[INPLAY_BET == "N"])
+#               
+#               , NO_OF_BID_TYPE = n_distinct(BID_TYP)
+#               , NO_OF_INPLAY_BET = n_distinct(INPLAY_BET))
 
 dt1.1$INPLAY_BET <- ifelse(dt1.1$MAX_BET_SIZE_INPLAY_BET_Y == -Inf, "N"
                          , ifelse(dt1.1$MAX_BET_SIZE_INPLAY_BET_N == -Inf, "Y", "YN"))
@@ -281,6 +316,19 @@ test_odds_1 <- c(2.88, 1.38, 2.10)
 test_odds_2 <- c(1.44, 3.08, 1.75)
 test_odds <- data.table(EVENT_SEQ = 46:44, ODDS_1 = test_odds_1, ODDS_2 = test_odds_2)
 dtTestFeatures <- merge(dtTestFeatures, test_odds, by = "EVENT_SEQ")
+
+
+####################
+## INPLAY_Y AND INPLAY_N
+####################
+dt1.1[, IND_INPLAY_Y := ifelse(INPLAY_BET == "Y", 1, 0)]
+dt1.1[, IND_INPLAY_N := ifelse(INPLAY_BET == "N", 1, 0)]
+dt1.1[, CUM_INPLAY_Y := cumsum(IND_INPLAY_Y), by = ACCOUNT_ID]
+dt1.1[, CUM_INPLAY_N := cumsum(IND_INPLAY_N), by = ACCOUNT_ID]
+
+dt1.1[, TIMES_INPLAY_Y := shift(CUM_INPLAY_Y, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, TIMES_INPLAY_N := shift(CUM_INPLAY_N, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
 ####################
 ## RESULT ##########
 ####################
@@ -330,6 +378,15 @@ RESULT <- c("AS_EXPECTED"
 
 RESULT <- data.table(EVENT_SEQ = 43:1, RESULT = RESULT)
 dt1.1 <- merge(dt1.1, RESULT, by = "EVENT_SEQ")
+
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1 <- dt1.1[, IND_RESULT_EXPECTED := ifelse(RESULT == "AS_EXPECTED", 1, 0)]
+dt1.1 <- dt1.1[, IND_RESULT_SUPRISED := ifelse(RESULT == "SUPRISED", 1, 0)]
+dt1.1[, CUM_RESULT_EXPECTED := cumsum(IND_RESULT_EXPECTED), by = ACCOUNT_ID]
+dt1.1[, CUM_RESULT_SUPRISED := cumsum(IND_RESULT_SUPRISED), by = ACCOUNT_ID]
+
+dt1.1[, TIMES_ATTENDING_EXPECTED_EVENT := shift(CUM_RESULT_EXPECTED, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, TIMES_ATTENDING_SUPRISED_EVENT := shift(CUM_RESULT_SUPRISED, fill = 0, type = "lag"), by = ACCOUNT_ID]
 
 # add it to the dtTestFeatures
 test_result <- c("AS_EXPECTED", "AS_EXPECTED", "SUPRISED")
@@ -440,6 +497,170 @@ dt1.1[, WIN_LOSE := CUM_WIN + CUM_LOSE]
 dt1.1 <- dt1.1[order(EVENT_SEQ)]
 dt1.1[, CUM_PROFIT_LOSS := cumsum(PROFIT_LOSS), by = ACCOUNT_ID]
 dt1.1[, TTL_PROFIT_LOSS := shift(CUM_PROFIT_LOSS, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## TIMES_BEING_A_ME2ME
+####################
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, CUM_ME2ME := cumsum(ME2ME), by = ACCOUNT_ID]
+dt1.1[, TIMES_BEING_A_ME2ME := shift(CUM_ME2ME, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+########################
+## TIMES_IN_AND_OUT_PLAY
+########################
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, IND_IN_AND_OUT_PAY := ifelse(NO_OF_INPLAY_BET == 2, 1, 0)]
+dt1.1[, CUM_IN_AND_OUT_PLAY := cumsum(IND_IN_AND_OUT_PAY), by = ACCOUNT_ID]
+dt1.1[, TIMES_IN_AND_OUT_PLAY := shift(CUM_IN_AND_OUT_PLAY, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## IS_FROM_WIN, IS_FROM_LOSE, IS_FROM_NEITHER
+####################
+country <- sort(unique(dt1.1$COUNTRY_OF_RESIDENCE_NAME)) # COUNTRY
+team <- sort(unique(dt$SELECTION_NAME)) # TEAM
+match <- sort(unique(dt1.1$MATCH)) # MATCH
+
+setdiff(team, country) # below teams are not in country
+# [1] "Afghanistan"          "England"              "Scotland"             "South Africa"        
+# [5] "United Arab Emirates" "West Indies"          "Zimbabwe"  
+
+# England and Scotland <- United Kingdom
+dt1.1$MATCH <- gsub("England", "United Kingdom", dt1.1$MATCH)
+dt1.1$MATCH <- gsub("Scotland", "United Kingdom", dt1.1$MATCH)
+dt$SELECTION_NAME <- gsub("England", "United Kingdom", dt$SELECTION_NAME)
+dt$SELECTION_NAME <- gsub("Scotland", "United Kingdom", dt$SELECTION_NAME)
+
+
+# UAE <- United Arab Emirates
+dt1.1$COUNTRY_OF_RESIDENCE_NAME <- gsub("UAE", "United Arab Emirates", dt1.1$COUNTRY_OF_RESIDENCE_NAME)
+
+country <- sort(unique(dt1.1$COUNTRY_OF_RESIDENCE_NAME)) # COUNTRY
+team <- sort(unique(dt$SELECTION_NAME)) # TEAM
+setdiff(team, country) # below teams are not in country
+# [1] "Afghanistan"  "South Africa" "West Indies"  "Zimbabwe"
+
+# WIN_TEAM
+WIN_TEAM <- c("New Zealand"
+              , "Australia"
+              , "India"
+              , "South Africa"
+              , "Pakistan"
+              , "West Indies"
+              , "Australia"
+              , "India"
+              , "United Kingdom"
+              , "New Zealand"
+              , "South Africa"
+              , "Sri Lanka"
+              , "India"
+              , "Bangladesh"
+              , "Australia"
+              , "New Zealand"
+              , "Ireland"
+              , "Pakistan"
+              , "India"
+              , "Bangladesh"
+              , "Australia"
+              , "Pakistan"
+              , "South Africa"
+              , "Pakistan"
+              , "Sri Lanka"
+              , "India"
+              , "New Zealand"
+              , "South Africa"
+              , "Sri Lanka"
+              , "Afghanistan"
+              , "Ireland"
+              , "West Indies"
+              , "United Kingdom"
+              , "India"
+              , "Sri Lanka"
+              , "West Indies"
+              , "New Zealand"
+              , "Zimbabwe"
+              , "Bangladesh"
+              , "New Zealand"
+              , "Ireland"
+              , "India"
+              , "South Africa")
+WIN_TEAM <- data.table(EVENT_SEQ = 43:1, WIN_TEAM = WIN_TEAM)
+dt1.1 <- merge(dt1.1, WIN_TEAM, by = "EVENT_SEQ")
+
+LOSE_TEAM <- as.character()
+for (i in 1:dim(dt1.1)[1]){
+    LOSE_TEAM[i] <- gsub(dt1.1[i]$WIN_TEAM, "", dt1.1[i]$MATCH)
+}
+
+LOSE_TEAM <- gsub(" v ", "", LOSE_TEAM)
+
+dt1.1$LOSE_TEAM <- LOSE_TEAM
+# this game is England v Scotland
+dt1.1$LOSE_TEAM[dt1.1$EVENT_SEQ == 11] <- "United Kingdom"
+
+dt1.1[, IS_FROM_WIN := ifelse(COUNTRY_OF_RESIDENCE_NAME == WIN_TEAM, 1, 0)]
+dt1.1[, IS_FROM_LOSE := ifelse(COUNTRY_OF_RESIDENCE_NAME == LOSE_TEAM, 1, 0)]
+dt1.1[, IS_FROM_NEITHER := ifelse(COUNTRY_OF_RESIDENCE_NAME != WIN_TEAM & COUNTRY_OF_RESIDENCE_NAME != LOSE_TEAM , 1, 0)]
+
+#############################################
+## convert into 3 events per unit ###########
+#############################################
+# remove some columns
+dt.3 <- dt1.1[, c("EVENT_SEQ", "EVENT_ID", "ACCOUNT_ID", "PROFIT_LOSS", "TRANSACTION_COUNT", "AVG_BET_SIZE"
+          , "MAX_BET_SIZE", "MIN_BET_SIZE", "STDEV_BET_SIZE", "TRANSACTION_COUNT_INPLAY_BET_Y"
+          , "TRANSACTION_COUNT_INPLAY_BET_N", "AVG_BET_SIZE_INPLAY_BET_Y", "AVG_BET_SIZE_INPLAY_BET_N"
+          , "MAX_BET_SIZE_INPLAY_BET_Y", "MAX_BET_SIZE_INPLAY_BET_N", "MIN_BET_SIZE_INPLAY_BET_Y"
+          , "MIN_BET_SIZE_INPLAY_BET_N", "STDEV_BET_SIZE_INPLAY_BET_Y", "STDEV_BET_SIZE_INPLAY_BET_N"
+          , "ME2ME", "TIMES_BEING_A_ME2ME", "IND_IN_AND_OUT_PAY", "TIMES_IN_AND_OUT_PLAY", "TIMES_INPLAY_Y", "TIMES_INPLAY_N"
+          , "ODDS_1", "ODDS_2", "SCORE_DIFF", "NO_OF_EVENT_ATTENDED", "NO_OF_WIN", "NO_OF_LOSE"
+          , "RATE_WIN", "WIN_LOSE", "TTL_PROFIT_LOSS", "IS_FROM_WIN", "IS_FROM_LOSE", "IS_FROM_NEITHER"
+          , "TIMES_ATTENDING_EXPECTED_EVENT", "TIMES_ATTENDING_SUPRISED_EVENT"
+          , "TIMES_INPLAY_Y", "TIMES_INPLAY_N"), with = F]
+
+dim(dt.3)
+# [1] 174226     41
+
+##############################
+## function Transform3to1 ####
+##############################
+Transform3to1 <- function(dt.3){
+    rangeRand <- range(dt.3$EVENT_SEQ)
+    randFrom <- rangeRand[1]
+    randTo <- rangeRand[2] - 2
+    
+    dtSample <- data.table()
+    for (i in randFrom:randTo){
+        i.consecutive <- c(i, i + 1, i + 2)
+        i.UNIT <- paste(str_pad(i, 2, pad = "0"), str_pad(i + 1, 2, pad = "0"), str_pad(i + 2, 2, pad = "0"), sep = "_")
+        dtTemp <- dt.3[EVENT_SEQ %in% i.consecutive, with = T]
+        dtTemp <- dtTemp[, EVENT_SEQ := NULL]
+        dtTemp <- dtTemp[, EVENT_ID := NULL]
+        dtTemp <- dtTemp[, UNIT := i.UNIT]
+        
+        dtTemp <- dtTemp %>%
+            group_by(ACCOUNT_ID, UNIT) %>%
+            summarise(SUM = sum(CUMSUM), LAGSUM = sum(LAGCUMSUM))
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

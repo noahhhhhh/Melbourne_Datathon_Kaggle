@@ -16,8 +16,8 @@ The objective is to determine if betting is just guessing, or if past performanc
 5. **(11/11/15) DONE -** add the EVENT SCORE_DIFF (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff).
 6. **(11/11/15) half DONE -** implement Feature Engineering 8 - 17.
 7. **(12/11/15) DONE -** start to implement the window function (e.g. dt[, CUMSUM := cumsum(C), by = A]; dt[, LAGCUMSUM := shift(CUMSUM, fill = 0, type = "lag"), by = A]) (pay attention to B's order, this needs to be incremental).
-8. **(13/11/15) not done yet -** IS_FROM_WIN, IS_FROM_LOSE
-9. **(13/11/15) not done yet -** TIMES_BEING_A_ME2ME
+8. **(13/11/15) DONE -** IS_FROM_WIN, IS_FROM_LOSE
+9. **(13/11/15) DONE -** TIMES_BEING_A_ME2ME
 9. **(13/11/15) not done yet -** Transform to 3 EVENTS per UNIT
 
 ###Feature Engineering
@@ -25,7 +25,7 @@ The objective is to determine if betting is just guessing, or if past performanc
   * IS_CHINESE & IS_JAPANESE
   * TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS & TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS
   * TIMES_PREV_BET_ON_CHINA_GAMES & TIMES_PREV_BET_ON_JAPAN_AND_WON
-2. **(09/11/15) half DONE -** Since ME2ME is a good indicator, then **TIMES_BEING_A_ME2ME** and **IS_ME2ME** would be useful.
+2. **(09/11/15) DONE -** Since ME2ME is a good indicator, then **TIMES_BEING_A_ME2ME** and **IS_ME2ME** would be useful.
   * TIMES_BEING_A_ME2ME
   * IS_ME2ME
 3. **(09/11/15) not done yet -** **TIMES_BEING_EARLY_5%** and **TIMES_BEING_EARLY_10%** would be useful.
