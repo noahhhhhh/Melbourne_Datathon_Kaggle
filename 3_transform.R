@@ -638,7 +638,12 @@ Transform3to1 <- function(dt.3){
         
         dtTemp <- dtTemp %>%
             group_by(ACCOUNT_ID, UNIT) %>%
-            summarise(SUM = sum(CUMSUM), LAGSUM = sum(LAGCUMSUM))
+            summarise(THIS_PROFIT_LOSS = sum(PROFIT_LOSS)
+                      , THIS_TRANSACTION_COUNT = sum(TRANSACTION_COUNT)
+                      , THIS_AVG_BET_SIZE = sum(TRANSACTION_COUNT * AVG_BET_SIZE) / 3
+                      , THIS_MAX_BET_SIZE = max(MAX_BET_SIZE)
+                      , THIS_MIN_BET_SIZE = min(MIN_BET_SIZE)
+                      , )
     }
 }
 
