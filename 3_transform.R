@@ -638,7 +638,7 @@ Transform3to1 <- function(dt.3){
         dtTemp <- dtTemp[, UNIT := i.UNIT]
         dtTemp[, RANK := rank(EVENT_SEQ, ties.method = "first"), by = ACCOUNT_ID]
         
-        dtTemp <- dtTemp %>%
+        dtTempAccountUnit <- dtTemp %>%
             group_by(ACCOUNT_ID, UNIT) %>%
             summarise(
                 # THIS PROFIT_LOSS
@@ -682,24 +682,24 @@ Transform3to1 <- function(dt.3){
                 # THIS IN_AND_OUT_PLAY
                 , THIS_IN_AND_OUT_PLAY = MyMode(IND_IN_AND_OUT_PAY)
                 
-                # THIS ODDS
-                , THIS_AVG_ODDS_1 = mean(ODDS_1)
-                , THIS_AVG_ODDS_2 = mean(ODDS_2)
-                , THIS_MAX_ODDS_1 = max(ODDS_1)
-                , THIS_MAX_ODDS_2 = max(ODDS_2)
-                , THIS_MIN_ODDS_1 = min(ODDS_1)
-                , THIS_MIN_ODDS_2 = min(ODDS_2)
-                , THIS_STDEV_ODDS_1 = sd(ODDS_1)
-                , THIS_STDEV_ODDS_2 = sd(ODDS_2)
+                # THIS ODDS (should be calculated alone, with UNIT only, not ACCOUNT_ID)
+#                 , THIS_AVG_ODDS_1 = mean(ODDS_1)
+#                 , THIS_AVG_ODDS_2 = mean(ODDS_2)
+#                 , THIS_MAX_ODDS_1 = max(ODDS_1)
+#                 , THIS_MAX_ODDS_2 = max(ODDS_2)
+#                 , THIS_MIN_ODDS_1 = min(ODDS_1)
+#                 , THIS_MIN_ODDS_2 = min(ODDS_2)
+#                 , THIS_STDEV_ODDS_1 = sd(ODDS_1)
+#                 , THIS_STDEV_ODDS_2 = sd(ODDS_2)
                 
-                # THIS SCORE_DIFF
-                , THIS_AVG_SCORE_DIFF = mean(SCORE_DIFF)
-                , THIS_MAX_SCORE_DIFF = max(SCORE_DIFF)
-                , THIS_MIN_SCORE_DIFF = min(SCORE_DIFF)
-                , THIS_STDEV_SCORE_DIFF = sd(SCORE_DIFF)
+                # THIS SCORE_DIFF (should be calcualted along, with UNIT only, not ACCOUNT_ID)
+#                 , THIS_AVG_SCORE_DIFF = mean(SCORE_DIFF)
+#                 , THIS_MAX_SCORE_DIFF = max(SCORE_DIFF)
+#                 , THIS_MIN_SCORE_DIFF = min(SCORE_DIFF)
+#                 , THIS_STDEV_SCORE_DIFF = sd(SCORE_DIFF)
                 
-                # THIS RESULT_EXPECTED
-                , THIS_RESULT_EXPECTED = MyMode(IND_RESULT_EXPECTED) # mode
+                # THIS RESULT_EXPECTED (should be calcualted along, with UNIT only, not ACCOUNT_ID)
+                # , THIS_RESULT_EXPECTED = MyMode(IND_RESULT_EXPECTED) # mode
                 
                 # THIS IS_FROM_WIN
                 , THIS_IS_FROM_WIN = MyMode(IS_FROM_WIN)
@@ -747,15 +747,105 @@ Transform3to1 <- function(dt.3){
                 , PRE_TIMES_ATTENDING_SUPRISED_EVENT = sum(TIMES_ATTENDING_SUPRISED_EVENT[RANK == 1])
             )
         
-        dtSample <- rbind(dtSample, dtTemp)
+        dtTempUnit <- dtTemp %>%
+            group_by(UNIT) %>%
+            summarise(
+                # THIS ODDS (should be calculated alone, with UNIT only, not ACCOUNT_ID)
+                THIS_AVG_ODDS_1 = mean(ODDS_1)
+                , THIS_AVG_ODDS_2 = mean(ODDS_2)
+                , THIS_MAX_ODDS_1 = max(ODDS_1)
+                , THIS_MAX_ODDS_2 = max(ODDS_2)
+                , THIS_MIN_ODDS_1 = min(ODDS_1)
+                , THIS_MIN_ODDS_2 = min(ODDS_2)
+                , THIS_STDEV_ODDS_1 = sd(ODDS_1)
+                , THIS_STDEV_ODDS_2 = sd(ODDS_2)
+                
+                # THIS SCORE_DIFF (should be calcualted along, with UNIT only, not ACCOUNT_ID)
+                , THIS_AVG_SCORE_DIFF = mean(SCORE_DIFF)
+                , THIS_MAX_SCORE_DIFF = max(SCORE_DIFF)
+                , THIS_MIN_SCORE_DIFF = min(SCORE_DIFF)
+                , THIS_STDEV_SCORE_DIFF = sd(SCORE_DIFF)
+                
+                # THIS RESULT_EXPECTED (should be calcualted along, with UNIT only, not ACCOUNT_ID)
+                , THIS_RESULT_EXPECTED = MyMode(IND_RESULT_EXPECTED) # mode
+            )
+        
+        dtTempMerge <- merge(dtTempAccountUnit, dtTempUnit, by = "UNIT", all.x = T)
+        dtSample <- rbind(dtSample, dtTempMerge)
     }
     
     return(dtSample)
 }
 
+dt.3in1 <- Transform3to1(dt1.1)
+# NAs
+apply(dt.3in1, 2, function(x) mean(is.na(x)))
+# ACCOUNT_ID                                      UNIT 
+# 0.0000000                                 0.0000000 
+# THIS_PROFIT_LOSS                THIS_AVG_TRANSACTION_COUNT 
+# 0.0000000                                 0.0000000 
+# THIS_MAX_TRANSACTION_COUNT                THIS_MIN_TRANSACTION_COUNT 
+# 0.0000000                                 0.0000000 
+# THIS_STDEV_TRANSACTION_COUNT                         THIS_AVG_BET_SIZE 
+# 0.5155646                                 0.0000000 
+# THIS_MAX_BET_SIZE                         THIS_MIN_BET_SIZE 
+# 0.0000000                                 0.0000000 
+# THIS_STDEV_BET_SIZE       TBIS_AVG_TRANSACTION_COUNT_INPLAY_Y 
+# 0.0000000                                 0.0000000 
+# TBIS_AVG_TRANSACTION_COUNT_INPLAY_N       TBIS_MAX_TRANSACTION_COUNT_INPLAY_Y 
+# 0.0000000                                 0.0000000 
+# TBIS_MAX_TRANSACTION_COUNT_INPLAY_N       THIS_MIN_TRANSACTION_COUNT_INPLAY_Y 
+# 0.0000000                                 0.0000000 
+# TBIS_MIN_TRANSACTION_COUNT_INPLAY_N THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_Y 
+# 0.0000000                                 0.5155646 
+# THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_N                THIS_AVG_BET_SIZE_INPLAY_Y 
+# 0.5155646                                 0.0000000 
+# THIS_AVG_BET_SIZE_INPLAY_N                THIS_MAX_BET_SIZE_INPLAY_Y 
+# 0.0000000                                 0.0000000 
+# THIS_MAX_BET_SIZE_INPLAY_N                THIS_MIN_BET_SIZE_INPLAY_Y 
+# 0.0000000                                 0.0000000 
+# THIS_MIN_BET_SIZE_INPLAY_N              THIS_STDEV_BET_SIZE_INPLAY_Y 
+# 0.0000000                                 0.1676173 
+# THIS_STDEV_BET_SIZE_INPLAY_N                                THIS_ME2ME 
+# 0.5429595                                 0.0000000 
+# THIS_IN_AND_OUT_PLAY                           THIS_AVG_ODDS_1 
+# 0.0000000                                 0.0000000 
+# THIS_AVG_ODDS_2                           THIS_MAX_ODDS_1 
+# 0.0000000                                 0.0000000 
+# THIS_MAX_ODDS_2                           THIS_MIN_ODDS_1 
+# 0.0000000                                 0.0000000 
+# THIS_MIN_ODDS_2                         THIS_STDEV_ODDS_1 
+# 0.0000000                                 0.5155646 
+# THIS_STDEV_ODDS_2                       THIS_AVG_SCORE_DIFF 
+# 0.5155646                                 0.0000000 
+# THIS_MAX_SCORE_DIFF                       THIS_MIN_SCORE_DIFF 
+# 0.0000000                                 0.0000000 
+# THIS_STDEV_SCORE_DIFF                      THIS_RESULT_EXPECTED 
+# 0.5155646                                 0.0000000 
+# THIS_IS_FROM_WIN                         THIS_IS_FROM_LOSE 
+# 0.0000000                                 0.0000000 
+# THIS_IS_FROM_NEITHER                   PRE_TIMES_BEING_A_ME2ME 
+# 0.0000000                                 0.0000000 
+# PRE_TIMES_IN_AND_OUT_PLAY                        PRE_TIMES_INPLAY_Y 
+# 0.0000000                                 0.0000000 
+# PRE_TIMES_INPLAY_N                  PRE_NO_OF_EVENT_ATTENDED 
+# 0.0000000                                 0.0000000 
+# PRE_NO_OF_WIN                            PRE_NO_OF_LOSE 
+# 0.0000000                                 0.0000000 
+# PRE_RATE_WIN                              PRE_WIN_LOSE 
+# 0.0000000                                 0.0000000 
+# PRE_TTL_PROFIT_LOSS        PRE_TIMES_ATTENDING_EXPECTED_EVENT 
+# 0.0000000                                 0.0000000 
+# PRE_TIMES_ATTENDING_SUPRISED_EVENT 
+# 0.0000000 
 
+dt.3in1$THIS_STDEV_TRANSACTION_COUNT[is.na(dt.3in1$THIS_STDEV_TRANSACTION_COUNT)] <- 0
+dt.3in1$THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_N[is.na(dt.3in1$THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_N)] <- 0
+dt.3in1$THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_Y[is.na(dt.3in1$THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_Y)] <- 0
+dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_Y[is.na(dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_Y)] <- 0
+dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_N[is.na(dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_N)] <- 0
 
-
+# 1008986, 41_42_43
 
 
 
