@@ -19,20 +19,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 8. **(13/11/15) DONE -** IS_FROM_WIN, IS_FROM_LOSE
 9. **(13/11/15) DONE -** TIMES_BEING_A_ME2ME
 10. **(13/11/15) not done yet -** Transform to 3 EVENTS per UNIT.  
-(e.g.  
-dt <- data.table()  
-for (i in 1:5){  
-    i.consecutive <- c(i, i+1, i+2)  
-    dt_temp <- dt1[B %in% i.consecutive, with = T]  
-    dt_temp <- dt_temp[, B := NULL]  
-    dt_temp <- dt_temp[, UNIT := paste(str_pad(i, 2, pad = "0"), str_pad(i + 1, 2, pad = "0"), str_pad(i + 2, 2, pad = "0"), sep = "_")]  
-    dt_temp <- dt_temp %>%  
-        group_by(A, UNIT) %>%  
-        summarise(SUM = sum(CUMSUM), LAGSUM = sum(LAGCUMSUM))  
-    dt <- rbind(dt, dt_temp)  
-    i <- i + 1  
-}  
-)
+11. **(18/11/15) not done yet -** combine the bonus feature csv into dt1.1 and transform all together, use duplicated to check NO_OF_BID_TYPE.
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
