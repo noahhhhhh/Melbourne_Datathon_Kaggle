@@ -12,7 +12,6 @@ load("../Datathon_Full_Dataset/transformedData.RData")
 dtSampleSubmit <- fread("../data_files/sample_submission_bet_size.csv")
 dtSampleSubmit[, Prediction := NULL]
 setnames(dtSampleSubmit, "Account_ID")
-dtSampleSubmit$Account_ID <- as.character(dtSampleSubmit$Account_ID)
 
 #######################################
 ## 1.0 scale ##########################
@@ -202,6 +201,6 @@ table(pred.test)
 # 10850  2085 
 dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, all.y = F)
-write.csv(dt.submit, "submit/2_191115_1731_rf_with_3in1.csv", row.names = FALSE) # 0.55338
+write.csv(dt.submit, "submit/3_191115_1131_rf_with_3in1_modified_agg_method.csv", row.names = FALSE) # 0.57096
 
 
