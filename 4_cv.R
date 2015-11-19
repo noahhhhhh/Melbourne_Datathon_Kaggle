@@ -20,10 +20,10 @@ dtSampleSubmit$Account_ID <- as.character(dtSampleSubmit$Account_ID)
 ##############################
 ## 1.1 scale all together ####
 ##############################
-dt.scaledAll <- scale(dt.3in1[, !c("UNIT", "ACCOUNT_ID"
+dt.scaledAll <- as.data.table(scale(dt.3in1[, !c("UNIT", "ACCOUNT_ID"
                                    , "THIS_ME2ME", "THIS_IN_AND_OUT_PLAY", "THIS_IS_FROM_WIN"
                                    , "THIS_IS_FROM_LOSE", "THIS_IS_FROM_NEITHER", "THIS_RESULT_EXPECTED"
-                                   , "PRED"), with = F])
+                                   , "PRED"), with = F]))
 
 dt.sacledAll <- cbind(dt.3in1[, c("UNIT", "ACCOUNT_ID"
                                   , "THIS_ME2ME", "THIS_IN_AND_OUT_PLAY", "THIS_IS_FROM_WIN"
@@ -44,7 +44,7 @@ dt.train[, UNIT := NULL]
 dt.train[, THIS_PROFIT_LOSS := NULL]
 str(dt.train)
 dim(dt.train)
-# [1] 309171     55
+# [1] 309171     55 # exclude ACCOUNT_ID
 ##############################
 ## 1.2 valid set #############
 ##############################
@@ -54,7 +54,7 @@ dt.valid[, UNIT := NULL]
 dt.valid[, THIS_PROFIT_LOSS := NULL]
 str(dt.valid)
 dim(dt.valid)
-# [1] 11893    55
+# [1] 11893    55 # exclude ACCOUNT_ID
 ##############################
 ## 1.3 test set #############
 ##############################
@@ -65,7 +65,7 @@ dt.test[, THIS_PROFIT_LOSS := NULL]
 dt.test[, PRED := NULL]
 str(dt.test)
 dim(dt.test)
-# [1] 12935    54
+# [1] 12935    54 # exclude ACCOUNT_ID
 
 #######################################
 ## 2.0 try to train a model  ##########
@@ -78,16 +78,16 @@ set.seed(1)
 md.bagTree <- randomForest(PRED ~., data = dt.train[, !c("ACCOUNT_ID"), with = F], mtry = 54, ntree = 20, importance = T)
 md.bagTree
 # Call:
-#     randomForest(formula = PRED ~ ., data = dt.train, mtry = 54,      ntree = 20, importance = T) 
+#     randomForest(formula = PRED ~ ., data = dt.train[, !c("ACCOUNT_ID"),      with = F], mtry = 54, ntree = 20, importance = T) 
 # Type of random forest: classification
 # Number of trees: 20
 # No. of variables tried at each split: 54
 # 
-# OOB estimate of  error rate: 12.98%
+# OOB estimate of  error rate: 12.92%
 # Confusion matrix:
 #     0      1 class.error
-# 0 135328  20851   0.1335071
-# 1  19287 133678   0.1260877
+# 0 135726  20682   0.1322311
+# 1  19267 133461   0.1261524
 
 varImpPlot(md.bagTree)
 
@@ -96,43 +96,40 @@ pred.valid <- predict(md.bagTree, newdata = dt.valid[, !c("ACCOUNT_ID"), with = 
 pred.valid <- as.numeric(ifelse(pred.valid == 1, 1, 0))
 colAUC(pred.valid, dt.valid$PRED, plotROC = T)
 # [,1]
-# 0 vs. 1 0.9224253
+# 0 vs. 1 0.9248425
 table(pred.valid, dt.valid$PRED)
-# pred.valid    0    1
-# 0 9205  238
-# 1  465 1985
-confusionMatrix(pred.valid, dt.valid$PRED)
 # Confusion Matrix and Statistics
 # 
 # Reference
 # Prediction    0    1
-# 0 9205  238
-# 1  465 1985
+# 0 9214  229
+# 1  457 1993
 # 
-# Accuracy : 0.9409          
-# 95% CI : (0.9365, 0.9451)
-# No Information Rate : 0.8131          
-# P-Value [Acc > NIR] : < 2.2e-16       
+# Accuracy : 0.9423         
+# 95% CI : (0.938, 0.9464)
+# No Information Rate : 0.8132         
+# P-Value [Acc > NIR] : < 2.2e-16      
 # 
-# Kappa : 0.8129          
-# Mcnemar's Test P-Value : < 2.2e-16       
-#                                           
-#             Sensitivity : 0.9519          
-#             Specificity : 0.8929          
-#          Pos Pred Value : 0.9748          
-#          Neg Pred Value : 0.8102          
-#              Prevalence : 0.8131          
-#          Detection Rate : 0.7740          
-#    Detection Prevalence : 0.7940          
-#       Balanced Accuracy : 0.9224          
-#                                           
-#        'Positive' Class : 0 
+# Kappa : 0.8174         
+# Mcnemar's Test P-Value : < 2.2e-16      
+# 
+# Sensitivity : 0.9527         
+# Specificity : 0.8969         
+# Pos Pred Value : 0.9757         
+# Neg Pred Value : 0.8135         
+# Prevalence : 0.8132         
+# Detection Rate : 0.7747         
+# Detection Prevalence : 0.7940         
+# Balanced Accuracy : 0.9248         
+# 
+# 'Positive' Class : 0 
 
 # try on test set
 pred.test <- predict(md.bagTree, newdata = dt.test[, !c("ACCOUNT_ID"), with = F])
 table(pred.test)
+# pred.test
 # 0     1 
-# 11691  1244 
+# 11725  1210 
 dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, all.y = F)
 write.csv(dt.submit, "submit/1_191115_1727_bagTree_with_3in1.csv", row.names = FALSE)
@@ -149,16 +146,16 @@ md.rf <- randomForest(PRED ~.
                       , importance = T)
 md.rf
 # Call:
-#     randomForest(formula = PRED ~ ., data = dt.train, mtry = ceiling(sqrt(54)),      ntree = 20, importance = T) 
+#     randomForest(formula = PRED ~ ., data = dt.train[, !c("ACCOUNT_ID"),      with = F], mtry = ceiling(sqrt(54)), ntree = 20, importance = T) 
 # Type of random forest: classification
 # Number of trees: 20
 # No. of variables tried at each split: 8
 # 
-# OOB estimate of  error rate: 15.46%
+# OOB estimate of  error rate: 15.99%
 # Confusion matrix:
 #     0      1 class.error
-# 0 131249  24925   0.1595976
-# 1  22882 130082   0.1495908
+# 0 130660  25753   0.1646474
+# 1  23689 129028   0.1551170
 
 varImpPlot(md.rf)
 # try on valid set
@@ -200,8 +197,9 @@ confusionMatrix(pred.valid, dt.valid$PRED)
 # try on test set
 pred.test <- predict(md.rf, newdata = dt.test[, !c("ACCOUNT_ID"), with = F])
 table(pred.test)
+# pred.test
 # 0     1 
-# 11691  1244 
+# 10850  2085 
 dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, all.y = F)
 write.csv(dt.submit, "submit/2_191115_1731_rf_with_3in1.csv", row.names = FALSE) # 0.55338

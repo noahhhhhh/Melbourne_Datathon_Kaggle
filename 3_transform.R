@@ -19,39 +19,40 @@ str(dtTestFeatures)
 ##############################
 # first thing first, remove EVETN_ID 101149752 as this is cancelled, the data is no use for training and testing purpose
 dt <- dt[EVENT_ID != 101149752, with = T]
-# try only consider the S transactions
-dt <- dt[STATUS_ID == "S", with = T]
 # reproduce the same format as that in the dtTestFeatures (a little bit more aggregated)
-dt1.0 <- dt %>%
+dt0.9 <- dt %>%
     group_by(ACCOUNT_ID
              , COUNTRY_OF_RESIDENCE_NAME
              , EVENT_ID
              , MATCH
-             # , BID_TYP # B, L
-             # , INPLAY_BET # Y, N
-             ) %>%
+             , STATUS_ID
+             , BID_TYP
+             , INPLAY_BET) %>%
     summarise(PROFIT_LOSS = sum(PROFIT_LOSS)
               , TRANSACTION_COUNT = n()
               , AVG_BET_SIZE = mean(BET_SIZE)
               , MAX_BET_SIZE = max(BET_SIZE)
               , MIN_BET_SIZE = min(BET_SIZE)
               , STDEV_BET_SIZE = sd(BET_SIZE)
-              
-              , TRANSACTION_COUNT_INPLAY_BET_Y = n_distinct(BET_TRANS_ID[INPLAY_BET == "Y"])
-              , TRANSACTION_COUNT_INPLAY_BET_N = n_distinct(BET_TRANS_ID[INPLAY_BET == "N"])
-              , AVG_BET_SIZE_INPLAY_BET_Y = mean(BET_SIZE[INPLAY_BET == "Y"])
-              , AVG_BET_SIZE_INPLAY_BET_N = mean(BET_SIZE[INPLAY_BET == "N"])
-              , MAX_BET_SIZE_INPLAY_BET_Y = max(BET_SIZE[INPLAY_BET == "Y"])
-              , MAX_BET_SIZE_INPLAY_BET_N = max(BET_SIZE[INPLAY_BET == "N"])
-              , MIN_BET_SIZE_INPLAY_BET_Y = min(BET_SIZE[INPLAY_BET == "Y"])
-              , MIN_BET_SIZE_INPLAY_BET_N = min(BET_SIZE[INPLAY_BET == "N"])
-              , STDEV_BET_SIZE_INPLAY_BET_Y = sd(BET_SIZE[INPLAY_BET == "Y"])
-              , STDEV_BET_SIZE_INPLAY_BET_N = sd(BET_SIZE[INPLAY_BET == "N"])
-              
-              , NO_OF_BID_TYPE = n_distinct(BID_TYP)
-              , NO_OF_INPLAY_BET = n_distinct(INPLAY_BET))
-dim(dt1.0)
-# [1] 174226     22
+              )
+
+# try only consider the S transactions
+dt0.9 <- dt0.9[STATUS_ID == "S", with = T]
+# ignore the BID_TYP
+dt0.9[, BID_TYP := NULL]
+dim(dt0.9)
+# [1] 290978     12
+dim(dtTestFeatures)
+# [1] 53070     9
+setdiff(names(dt0.9), names(dtTestFeatures))
+# [1] "ACCOUNT_ID"                "COUNTRY_OF_RESIDENCE_NAME" "MATCH"                    
+# [4] "PROFIT_LOSS" 
+# get the duplicated rows (duplicated because forgetting to remove BID_TYP from Group in SQL)
+duplicatedCozBID_TYP <- duplicated(dt0.9[, c("ACCOUNT_ID", "EVENT_ID", "INPLAY_BET"), with = F])
+# used to esitmate the NO_OF_BID_TYPE
+dt0.9$CNT_BID_TYPE <- duplicatedCozBID_TYP
+dim(dt0.9)
+# [1] 290978     13
 
 ##############################
 ## 1.2 format test data ######
@@ -70,15 +71,98 @@ dtTempAccountCountry$ACCOUNT_ID <- as.integer(dtTempAccountCountry$ACCOUNT_ID)
 dtTestFeatures <- merge(dtTestFeatures, dtTempAccountCountry, by = "ACCOUNT_ID", all.x = T)
 # used to populate the MATCH
 testMatch <- data.table(EVENT_ID = sort(unique(dtTestFeatures$EVENT_ID))
-                                        , MATCH = c("New Zealand v South Africa", "Australia v India", "New Zealand v Australia"))
+                        , MATCH = c("New Zealand v South Africa", "Australia v India", "New Zealand v Australia"))
 dtTestFeatures <- merge(dtTestFeatures, testMatch, by = "EVENT_ID", all.x = T)
 # used to mockup the PROFIT_LOSS
 dtTestFeatures$PROFIT_LOSS <- 0
 dim(dtTestFeatures)
 # [1] 38020    13
 
-# aggregate into a dtTest set
-dtTest <- dtTestFeatures %>%
+##############################
+## 1.3 combine train and test so they can process together ######
+##############################
+dt0.9 <- dt0.9[, c("ACCOUNT_ID"
+                   , "COUNTRY_OF_RESIDENCE_NAME"
+                   , "EVENT_ID"
+                   , "MATCH"
+                   , "STATUS_ID"
+                   , "INPLAY_BET"
+                   , "TRANSACTION_COUNT"
+                   , "AVG_BET_SIZE"
+                   , "MAX_BET_SIZE"
+                   , "MIN_BET_SIZE"
+                   , "STDEV_BET_SIZE"
+                   , "CNT_BID_TYPE"
+                   , "PROFIT_LOSS")
+               , with = F]
+dtTestFeatures <- dtTestFeatures[, c("ACCOUNT_ID"
+                                     , "COUNTRY_OF_RESIDENCE_NAME"
+                                     , "EVENT_ID"
+                                     , "MATCH"
+                                     , "STATUS_ID"
+                                     , "INPLAY_BET"
+                                     , "TRANSACTION_COUNT"
+                                     , "AVG_BET_SIZE"
+                                     , "MAX_BET_SIZE"
+                                     , "MIN_BET_SIZE"
+                                     , "STDEV_BET_SIZE"
+                                     , "CNT_BID_TYPE"
+                                     , "PROFIT_LOSS")
+                                 , with = F]
+# ensure column sequence is the same
+identical(names(dt0.9), names(dtTestFeatures))
+# ensure class of columns is the same
+# before
+str(dt0.9)
+str(dtTestFeatures)
+dt0.9$ACCOUNT_ID <- as.integer(dt0.9$ACCOUNT_ID)
+dt0.9$EVENT_ID <- as.integer(dt0.9$EVENT_ID)
+dt0.9$STATUS_ID <- as.character(dt0.9$STATUS_ID)
+dt0.9$INPLAY_BET <- as.character(dt0.9$INPLAY_BET)
+# after
+str(dt0.9)
+str(dtTestFeatures)
+# combine
+dt1.0 <- rbind(dt0.9, dtTestFeatures)
+dim(dt0.9); dim(dtTestFeatures); dim(dt1.0)
+# [1] 174226     22
+# [1] 22976    22
+# [1] 197202     22
+
+# # further aggregate
+# dt1.0 <- dt0.9 %>%
+#     group_by(ACCOUNT_ID
+#              , COUNTRY_OF_RESIDENCE_NAME
+#              , EVENT_ID
+#              , MATCH
+#              # , BID_TYP # B, L
+#              # , INPLAY_BET # Y, N
+#              ) %>%
+#     summarise(PROFIT_LOSS = sum(PROFIT_LOSS)
+#               , TRANSACTION_COUNT = sum(TRANSACTION_COUNT)
+#               , AVG_BET_SIZE = mean(BET_SIZE)
+#               , MAX_BET_SIZE = max(BET_SIZE)
+#               , MIN_BET_SIZE = min(BET_SIZE)
+#               , STDEV_BET_SIZE = sd(BET_SIZE)
+#               
+#               , TRANSACTION_COUNT_INPLAY_BET_Y = n_distinct(BET_TRANS_ID[INPLAY_BET == "Y"])
+#               , TRANSACTION_COUNT_INPLAY_BET_N = n_distinct(BET_TRANS_ID[INPLAY_BET == "N"])
+#               , AVG_BET_SIZE_INPLAY_BET_Y = mean(BET_SIZE[INPLAY_BET == "Y"])
+#               , AVG_BET_SIZE_INPLAY_BET_N = mean(BET_SIZE[INPLAY_BET == "N"])
+#               , MAX_BET_SIZE_INPLAY_BET_Y = max(BET_SIZE[INPLAY_BET == "Y"])
+#               , MAX_BET_SIZE_INPLAY_BET_N = max(BET_SIZE[INPLAY_BET == "N"])
+#               , MIN_BET_SIZE_INPLAY_BET_Y = min(BET_SIZE[INPLAY_BET == "Y"])
+#               , MIN_BET_SIZE_INPLAY_BET_N = min(BET_SIZE[INPLAY_BET == "N"])
+#               , STDEV_BET_SIZE_INPLAY_BET_Y = sd(BET_SIZE[INPLAY_BET == "Y"])
+#               , STDEV_BET_SIZE_INPLAY_BET_N = sd(BET_SIZE[INPLAY_BET == "N"])
+#               
+#               , NO_OF_BID_TYPE = n_distinct(BID_TYP)
+#               , NO_OF_INPLAY_BET = n_distinct(INPLAY_BET))
+# dim(dt1.0)
+# # [1] 174226     22
+
+# aggregate
+dt1.1 <- dt1.0 %>%
     group_by(ACCOUNT_ID
              , COUNTRY_OF_RESIDENCE_NAME
              , EVENT_ID
@@ -91,7 +175,7 @@ dtTest <- dtTestFeatures %>%
               , AVG_BET_SIZE = sum(AVG_BET_SIZE * TRANSACTION_COUNT) / sum(TRANSACTION_COUNT)
               , MAX_BET_SIZE = max(MAX_BET_SIZE)
               , MIN_BET_SIZE = min(MIN_BET_SIZE)
-              , STDEV_BET_SIZE = sqrt(sum((STDEV_BET_SIZE ^ 2) * TRANSACTION_COUNT) / sum(TRANSACTION_COUNT))
+              , STDEV_BET_SIZE = mean(STDEV_BET_SIZE) / sqrt(sum(TRANSACTION_COUNT)) # this is just an estimate
               
               , TRANSACTION_COUNT_INPLAY_BET_Y = sum(TRANSACTION_COUNT[INPLAY_BET == "Y"])
               , TRANSACTION_COUNT_INPLAY_BET_N = sum(TRANSACTION_COUNT[INPLAY_BET == "N"])
@@ -101,24 +185,16 @@ dtTest <- dtTestFeatures %>%
               , MAX_BET_SIZE_INPLAY_BET_N = max(MAX_BET_SIZE[INPLAY_BET == "N"])
               , MIN_BET_SIZE_INPLAY_BET_Y = min(MIN_BET_SIZE[INPLAY_BET == "Y"])
               , MIN_BET_SIZE_INPLAY_BET_N = min(MIN_BET_SIZE[INPLAY_BET == "N"])
-              , STDEV_BET_SIZE_INPLAY_BET_Y = sqrt(sum((STDEV_BET_SIZE[INPLAY_BET == "Y"] ^ 2) * TRANSACTION_COUNT[INPLAY_BET == "Y"]) / sum(TRANSACTION_COUNT[INPLAY_BET == "Y"]))
-              , STDEV_BET_SIZE_INPLAY_BET_N = sqrt(sum((STDEV_BET_SIZE[INPLAY_BET == "N"] ^ 2) * TRANSACTION_COUNT[INPLAY_BET == "N"]) / sum(TRANSACTION_COUNT[INPLAY_BET == "N"]))
+              , STDEV_BET_SIZE_INPLAY_BET_Y = mean(STDEV_BET_SIZE[INPLAY_BET == "Y"]) / sqrt(sum(TRANSACTION_COUNT[INPLAY_BET == "Y"]))
+              , STDEV_BET_SIZE_INPLAY_BET_N = mean(STDEV_BET_SIZE[INPLAY_BET == "Y"]) / sqrt(sum(TRANSACTION_COUNT[INPLAY_BET == "Y"]))
               
               , NO_OF_BID_TYPE = sum(CNT_BID_TYPE) # this is just an estimate as we dont have B and L visible
               , NO_OF_INPLAY_BET = n_distinct(INPLAY_BET))
 
 # modify NO_OF_BID_TYPE in line with the train
-dtTest[, NO_OF_BID_TYPE := ifelse(NO_OF_BID_TYPE > 0, 2, 1)]
-
-##############################
-## 1.3 combine train and test so they can process together ######
-##############################
-identical(names(dt1.0), names(dtTest))
-dt1.1 <- rbind(dt1.0, dtTest)
-dim(dt1.0); dim(dtTest); dim(dt1.1)
-# [1] 174226     22
-# [1] 22976    22
-# [1] 197202     22
+dt1.1[, NO_OF_BID_TYPE := ifelse(NO_OF_BID_TYPE > 0, 2, 1)]
+dim(dt1.1)
+# [1] 328998     22
 ##############################
 ## 1.4 feature cleansing #####
 ##############################
@@ -131,23 +207,23 @@ dt1.1$INPLAY_BET <- ifelse(dt1.1$MAX_BET_SIZE_INPLAY_BET_Y == -Inf, "N"
 ## NAs #############
 ####################
 # before
-apply(dt1.1, 2, function(x) mean(is.na(x)))
+apply(dt1.1, 2, function(x) sum(is.na(x)))
 # ACCOUNT_ID      COUNTRY_OF_RESIDENCE_NAME                       EVENT_ID 
-# 0.00000000                     0.02005051                     0.00000000 
+# 0.00000000                     0.01507304                     0.00000000 
 # MATCH                    PROFIT_LOSS              TRANSACTION_COUNT 
 # 0.00000000                     0.00000000                     0.00000000 
 # AVG_BET_SIZE                   MAX_BET_SIZE                   MIN_BET_SIZE 
 # 0.00000000                     0.00000000                     0.00000000 
 # STDEV_BET_SIZE TRANSACTION_COUNT_INPLAY_BET_Y TRANSACTION_COUNT_INPLAY_BET_N 
-# 0.25923672                     0.00000000                     0.00000000 
+# 0.33665250                     0.00000000                     0.00000000 
 # AVG_BET_SIZE_INPLAY_BET_Y      AVG_BET_SIZE_INPLAY_BET_N      MAX_BET_SIZE_INPLAY_BET_Y 
-# 0.19691484                     0.61267127                     0.00000000 
+# 0.12586399                     0.56085143                     0.00000000 
 # MAX_BET_SIZE_INPLAY_BET_N      MIN_BET_SIZE_INPLAY_BET_Y      MIN_BET_SIZE_INPLAY_BET_N 
 # 0.00000000                     0.00000000                     0.00000000 
 # STDEV_BET_SIZE_INPLAY_BET_Y    STDEV_BET_SIZE_INPLAY_BET_N                 NO_OF_BID_TYPE 
-# 0.36730358                     0.82137098                     0.00000000 
+# 0.35023313                     0.35023313                     0.00000000 
 # NO_OF_INPLAY_BET                     INPLAY_BET 
-# 0.00000000                     0.00000000 
+# 0.00000000                     0.00000000
 dt1.1$COUNTRY_OF_RESIDENCE_NAME[is.na(dt1.1$COUNTRY_OF_RESIDENCE_NAME)] <- "Unknown"
 dt1.1$STDEV_BET_SIZE[is.na(dt1.1$STDEV_BET_SIZE)] <- 0
 dt1.1$AVG_BET_SIZE_INPLAY_BET_Y[is.na(dt1.1$AVG_BET_SIZE_INPLAY_BET_Y)] <- 0
@@ -155,7 +231,7 @@ dt1.1$AVG_BET_SIZE_INPLAY_BET_N[is.na(dt1.1$AVG_BET_SIZE_INPLAY_BET_N)] <- 0
 dt1.1$STDEV_BET_SIZE_INPLAY_BET_Y[is.na(dt1.1$STDEV_BET_SIZE_INPLAY_BET_Y)] <- 0
 dt1.1$STDEV_BET_SIZE_INPLAY_BET_N[is.na(dt1.1$STDEV_BET_SIZE_INPLAY_BET_N)] <- 0
 # after
-apply(dt1.1, 2, function(x) mean(is.na(x)))
+apply(dt1.1, 2, function(x) sum(is.na(x)))
 # ACCOUNT_ID      COUNTRY_OF_RESIDENCE_NAME                       EVENT_ID 
 # 0                              0                              0 
 # MATCH                    PROFIT_LOSS              TRANSACTION_COUNT 
@@ -245,13 +321,10 @@ unique(dt[, c("EVENT_ID", "EVENT_DT", "MATCH"), with = F])[order(EVENT_DT)]
 dtTempSeqTrain <- unique(dt[, c("EVENT_ID", "EVENT_DT", "MATCH"), with = F])[order(EVENT_DT)]
 dtTempSeqTrain$EVENT_SEQ <- 1:43
 dtTempSeqTrain <- dtTempSeqTrain[, c("EVENT_ID", "EVENT_SEQ"), with = F]
-dtTempSeqTest <- data.table(EVENT_ID = sort(unique(dtTest$EVENT_ID)), EVENT_SEQ = 44:46)
+dtTempSeqTest <- data.table(EVENT_ID = sort(unique(dtTestFeatures$EVENT_ID)), EVENT_SEQ = 44:46)
 dtTempSeq <- rbind(dtTempSeqTrain, dtTempSeqTest)
+dtTempSeq$EVENT_ID <- as.integer(dtTempSeq$EVENT_ID)
 dt1.1 <- merge(dt1.1, dtTempSeq, by = "EVENT_ID")
-
-# add it to the dtTestFeatures
-test_seq <- data.table(EVENT_ID = sort(unique(dtTestFeatures$EVENT_ID)), EVENT_SEQ = 44:46)
-dtTestFeatures <- merge(dtTestFeatures, test_seq, by = "EVENT_ID")
 
 ####################
 ## ODDS ############
@@ -621,12 +694,60 @@ WIN_TEAM <- c("Australia"
 WIN_TEAM <- data.table(EVENT_SEQ = 46:1, WIN_TEAM = WIN_TEAM)
 dt1.1 <- merge(dt1.1, WIN_TEAM, by = "EVENT_SEQ")
 
-LOSE_TEAM <- as.character()
-for (i in 1:dim(dt1.1)[1]){
-    LOSE_TEAM[i] <- gsub(dt1.1[i]$WIN_TEAM, "", dt1.1[i]$MATCH)
-}
+# LOSE_TEAM
+LOSE_TEAM <- c("New Zealand"
+              , "India"
+              , "South Africa"
+              , "West Indies"
+              , "Pakistan"
+              , "Bangladesh"
+              , "Sri Lanka"
+              , "Ireland"
+              , "United Arab Emirates"
+              , "United Kingdom"
+              , "Zimbabwe"
+              , "Afghanistan"
+              , "Bangladesh"
+              , "United Arab Emirates"
+              , "United Kingdom"
+              , "Ireland"
+              , "United Kingdom"
+              , "Sri Lanka"
+              , "Afghanistan"
+              , "Zimbabwe"
+              , "South Africa"
+              , "West Indies"
+              , "United Kingdom"
+              , "Afghanistan"
+              , "United Arab Emirates"
+              , "Ireland"
+              , "Zimbabwe"
+              , "United Kingdom"
+              , "United Arab Emirates"
+              , "Australia"
+              , "West Indies"
+              , "Bangladesh"
+              , "United Kingdom"
+              , "United Arab Emirates"
+              , "Zimbabwe"
+              , "United Kingdom"
+              , "South Africa"
+              , "Afghanistan"
+              , "Pakistan"
+              , "United Kingdom"
+              , "United Arab Emirates"
+              , "Afghanistan"
+              , "United Kingdom"
+              , "West Indies"
+              , "Pakistan"
+              , "Zimbabwe")
 
-LOSE_TEAM <- gsub(" v ", "", LOSE_TEAM)
+# LOSE_TEAM <- as.character()
+# for (i in 1:dim(dt1.1)[1]){
+#     LOSE_TEAM[i] <- gsub(dt1.1[i]$WIN_TEAM, "", dt1.1[i]$MATCH)
+# }
+# 
+# LOSE_TEAM <- gsub(" v ", "", LOSE_TEAM)
 
 dt1.1$LOSE_TEAM <- LOSE_TEAM
 # this game is England v Scotland
@@ -689,7 +810,7 @@ Transform3to1 <- function(dt){
                 , THIS_AVG_BET_SIZE = sum(TRANSACTION_COUNT * AVG_BET_SIZE) / 3
                 , THIS_MAX_BET_SIZE = max(MAX_BET_SIZE)
                 , THIS_MIN_BET_SIZE = min(MIN_BET_SIZE)
-                , THIS_STDEV_BET_SIZE = sqrt(sum((STDEV_BET_SIZE ^ 2) * TRANSACTION_COUNT) / sum(TRANSACTION_COUNT))
+                , THIS_STDEV_BET_SIZE = mean(STDEV_BET_SIZE) / sqrt(sum(TRANSACTION_COUNT))
                 
                 # THIS TRANSACTION_COUNT INPLAY
                 , THIS_AVG_TRANSACTION_COUNT_INPLAY_Y = sum(TRANSACTION_COUNT_INPLAY_BET_Y) / 3
@@ -708,8 +829,8 @@ Transform3to1 <- function(dt){
                 , THIS_MAX_BET_SIZE_INPLAY_N = max(MAX_BET_SIZE_INPLAY_BET_N)
                 , THIS_MIN_BET_SIZE_INPLAY_Y = min(MIN_BET_SIZE_INPLAY_BET_Y)
                 , THIS_MIN_BET_SIZE_INPLAY_N = min(MIN_BET_SIZE_INPLAY_BET_N)
-                , THIS_STDEV_BET_SIZE_INPLAY_Y = sqrt(sum((STDEV_BET_SIZE_INPLAY_BET_Y ^ 2) * TRANSACTION_COUNT_INPLAY_BET_Y) / sum(TRANSACTION_COUNT_INPLAY_BET_Y))
-                , THIS_STDEV_BET_SIZE_INPLAY_N = sqrt(sum((STDEV_BET_SIZE_INPLAY_BET_N ^ 2) * TRANSACTION_COUNT_INPLAY_BET_N) / sum(TRANSACTION_COUNT_INPLAY_BET_N))
+                , THIS_STDEV_BET_SIZE_INPLAY_Y = mean(STDEV_BET_SIZE_INPLAY_BET_Y) / sqrt(sum(TRANSACTION_COUNT_INPLAY_BET_Y))
+                , THIS_STDEV_BET_SIZE_INPLAY_N = mean(STDEV_BET_SIZE_INPLAY_BET_N) / sqrt(sum(TRANSACTION_COUNT_INPLAY_BET_N))
                 
                 # THIS ME2ME
                 , THIS_ME2ME = MyMode(ME2ME)
@@ -1071,6 +1192,11 @@ str(dt.3in1)
 # $ THIS_MIN_SCORE_DIFF                      : num  -3 -3 -3 -3 -3 -3 -3 -3 -3 -3 ...
 # $ THIS_STDEV_SCORE_DIFF                    : num  36 36 36 36 36 ...
 # $ THIS_RESULT_EXPECTED                     : Factor w/ 2 levels "0","1": 2 2 2 2 2 2 2 2 2 2 ...
+
+# inf, -inf
+# before
+sum(is.finite(dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_N))
+dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_N[dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_N %in% c(Inf, -Inf)] <- 0
 
 ##############################
 ## 1.6 add prediction column #
