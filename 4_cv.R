@@ -89,6 +89,8 @@ md.bagTree
 # 0 135328  20851   0.1335071
 # 1  19287 133678   0.1260877
 
+varImpPlot(md.bagTree)
+
 # try on valid set
 pred.valid <- predict(md.bagTree, newdata = dt.valid[, !c("ACCOUNT_ID"), with = F])
 pred.valid <- as.numeric(ifelse(pred.valid == 1, 1, 0))
