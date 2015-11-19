@@ -604,6 +604,24 @@ dt1.1[, CUM_PROFIT_LOSS := cumsum(PROFIT_LOSS), by = ACCOUNT_ID]
 dt1.1[, TTL_PROFIT_LOSS := shift(CUM_PROFIT_LOSS, fill = 0, type = "lag"), by = ACCOUNT_ID]
 
 ####################
+## AVG_PROFIT_LOSS #
+####################
+dt1.1[, CUM_AVG_PROFIT_LOSS := ifelse(CUM_ATTENDED == 0, 0, CUM_PROFIT_LOSS / CUM_ATTENDED), by = ACCOUNT_ID]
+dt1.1[, AVG_PROFIT_LOSS := shift(CUM_AVG_PROFIT_LOSS, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## MAX_PROFIT_LOSS #
+####################
+dt1.1[, CUM_MAX_PROFIT_LOSS := cummax(PROFIT_LOSS), by = ACCOUNT_ID]
+dt1.1[, MAX_PROFIT_LOSS := shift(CUM_MAX_PROFIT_LOSS, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## MIN_PROFIT_LOSS #
+####################
+dt1.1[, CUM_MIN_PROFIT_LOSS := cummin(PROFIT_LOSS), by = ACCOUNT_ID]
+dt1.1[, MIN_PROFIT_LOSS := shift(CUM_MIN_PROFIT_LOSS, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
 ## TIMES_BEING_A_ME2ME
 ####################
 dt1.1 <- dt1.1[order(EVENT_SEQ)]
@@ -768,7 +786,8 @@ dt.3 <- dt1.1[, c("EVENT_SEQ", "EVENT_ID", "ACCOUNT_ID", "PROFIT_LOSS", "TRANSAC
           , "MIN_BET_SIZE_INPLAY_BET_N", "STDEV_BET_SIZE_INPLAY_BET_Y", "STDEV_BET_SIZE_INPLAY_BET_N"
           , "ME2ME", "TIMES_BEING_A_ME2ME", "IND_IN_AND_OUT_PAY", "TIMES_IN_AND_OUT_PLAY", "TIMES_INPLAY_Y", "TIMES_INPLAY_N"
           , "ODDS_1", "ODDS_2", "SCORE_DIFF", "NO_OF_EVENT_ATTENDED", "NO_OF_WIN", "NO_OF_LOSE"
-          , "RATE_WIN", "WIN_LOSE", "TTL_PROFIT_LOSS", "IS_FROM_WIN", "IS_FROM_LOSE", "IS_FROM_NEITHER"
+          , "RATE_WIN", "WIN_LOSE", "TTL_PROFIT_LOSS", "AVG_PROFIT_LOSS", "MAX_PROFIT_LOSS", "MIN_PROFIT_LOSS"
+          , "IS_FROM_WIN", "IS_FROM_LOSE", "IS_FROM_NEITHER"
           , "TIMES_ATTENDING_EXPECTED_EVENT", "TIMES_ATTENDING_SUPRISED_EVENT"
           , "IND_RESULT_EXPECTED"), with = F]
 
@@ -893,13 +912,22 @@ Transform3to1 <- function(dt){
                 # PRE WIN_LOSE
                 , PRE_WIN_LOSE = sum(WIN_LOSE[RANK == 1])
                 
-                # TTL_PROFIT_LOSS
+                # PRE TTL_PROFIT_LOSS
                 , PRE_TTL_PROFIT_LOSS = sum(TTL_PROFIT_LOSS[RANK == 1])
                 
-                # PRE TIMES_ATTENDING_EXPECTED_EVENT
+                # PRE AVG_PROFIT_LOSS
+                , PRE_AVG_PROFIT_LOSS = sum(AVG_PROFIT_LOSS[RANK == 1])
+                
+                # PRE MAX_PROFIT_LOSS
+                , PRE_MAX_PROFIT_LOSS = sum(MAX_PROFIT_LOSS[RANK == 1])
+
+                # PRE MIN_PROFIT_LOSS
+                , PRE_MIN_PROFIT_LOSS = sum(MIN_PROFIT_LOSS[RANK == 1])
+                
+                # PRE PRE TIMES_ATTENDING_EXPECTED_EVENT
                 , PRE_TIMES_ATTENDING_EXPECTED_EVENT = sum(TIMES_ATTENDING_EXPECTED_EVENT[RANK == 1])
                 
-                # PRE TIMES_ATTENDING_SUPRISED_EVENT
+                # PRE PRE TIMES_ATTENDING_SUPRISED_EVENT
                 , PRE_TIMES_ATTENDING_SUPRISED_EVENT = sum(TIMES_ATTENDING_SUPRISED_EVENT[RANK == 1])
             )
         

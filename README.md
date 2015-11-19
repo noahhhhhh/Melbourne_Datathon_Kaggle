@@ -14,7 +14,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 3. **(10/11/15) DONE -** Add the offical odds of Win/Lose of each EVENT_ID.
 4. **(10/11/15) DONE -** Add the event result, RESULT (Suprised, As Expected).
 5. **(11/11/15) DONE -** add the EVENT SCORE_DIFF (AS_EXPECTEDs are +ve diff and SUPRISEDs are -ve diff).
-6. **(11/11/15) half DONE -** implement Feature Engineering 8 - 17.
+6. **(11/11/15) DONE -** implement Feature Engineering 8 - 17.
 7. **(12/11/15) DONE -** start to implement the window function (e.g. dt[, CUMSUM := cumsum(C), by = A]; dt[, LAGCUMSUM := shift(CUMSUM, fill = 0, type = "lag"), by = A]) (pay attention to B's order, this needs to be incremental).
 8. **(13/11/15) DONE -** IS_FROM_WIN, IS_FROM_LOSE
 9. **(13/11/15) DONE -** TIMES_BEING_A_ME2ME
@@ -22,7 +22,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 11. **(18/11/15) DONE -** combine the bonus feature csv into dt1.1 and transform all together, use duplicated() to check NO_OF_BID_TYPE.
 12. **(18/11/15) DONE -** convert the class of each column
 13. **(18/11/15) DONE -** aggregating stdev is problematic
-14. **(18/11/15) not done yet -** get the item 6 done!
+14. **(18/11/15) DONE -** get the item 6 done!
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
@@ -49,9 +49,9 @@ The objective is to determine if betting is just guessing, or if past performanc
 11. **(11/11/15) DONE -** **NO_OF_EVENT_WON**
 12. **(11/11/15) DONE -** **NO_OF_EVENT_LOSE**
 13. **(11/11/15) DONE -** **TTL_PROFIT_LOSS**
-14. **(11/11/15) not done yet -** **MAX_PROFIT_LOSS_PER_EVENT**
-15. **(11/11/15) not done yet -** **MIN_PROFIT_LOSS_PER_EVENT**
-16. **(11/11/15) not done yet -** **AVG_PROFIT_LOSS_PER_EVENT**
+14. **(11/11/15) DONE -** **MAX_PROFIT_LOSS_PER_EVENT**
+15. **(11/11/15) DONE -** **MIN_PROFIT_LOSS_PER_EVENT**
+16. **(11/11/15) DONE -** **AVG_PROFIT_LOSS_PER_EVENT**
 17. **(11/11/15) not done yet -** **AVG_PROFIT_LOSS_LAST_ATTENDED_EVENT**
 18. **(12/11/15) DONE -** Phil's **WIN_LOSE** (WIN: +1; LOSE: -1)
 
