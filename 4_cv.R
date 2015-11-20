@@ -37,7 +37,7 @@ str(dt.sacledAll)
 ##############################
 ## 1.1 train set #############
 ##############################
-dt.train <- dt.sacledAll[!UNIT %in% c("43_44_45", "44_45_46"), with = T]
+dt.train <- dt.sacledAll[!UNIT %in% c("39_40_41", "40_41_42", "41_42_43", "42_43_44", "43_44_45", "44_45_46"), with = T]
 dt.train[, UNIT := NULL]
 # dt.train[, ACCOUNT_ID := NULL]
 dt.train[, THIS_PROFIT_LOSS := NULL]
@@ -47,7 +47,7 @@ dim(dt.train)
 ##############################
 ## 1.2 valid set #############
 ##############################
-dt.valid <- dt.sacledAll[UNIT == c("43_44_45"), with = T]
+dt.valid <- dt.sacledAll[UNIT == c("41_42_43"), with = T]
 dt.valid[, UNIT := NULL]
 # dt.valid[, ACCOUNT_ID := NULL]
 dt.valid[, THIS_PROFIT_LOSS := NULL]
@@ -145,62 +145,61 @@ md.rf <- randomForest(PRED ~.
                       , importance = T)
 md.rf
 # Call:
-#     randomForest(formula = PRED ~ ., data = dt.train[, !c("ACCOUNT_ID"),      with = F], mtry = ceiling(sqrt(54)), ntree = 20, importance = T) 
+#     randomForest(formula = PRED ~ ., data = dt.train[, !c("ACCOUNT_ID"),      with = F], mtry = floor(sqrt(57)), ntree = 20, importance = T) 
 # Type of random forest: classification
 # Number of trees: 20
-# No. of variables tried at each split: 8
+# No. of variables tried at each split: 7
 # 
-# OOB estimate of  error rate: 15.99%
+# OOB estimate of  error rate: 16.81%
 # Confusion matrix:
 #     0      1 class.error
-# 0 130660  25753   0.1646474
-# 1  23689 129028   0.1551170
+# 0 110180  24172   0.1799154
+# 1  21820 117483   0.1566370
 
 varImpPlot(md.rf)
 # try on valid set
 pred.valid <- predict(md.rf, newdata = dt.valid[, !c("ACCOUNT_ID"), with = F])
-pred.valid <- as.numeric(ifelse(pred.valid == 1, 1, 0))
+pred.valid <- as.integer(pred.valid)
 colAUC(pred.valid, dt.valid$PRED, plotROC = T)
 # [,1]
-# 0 vs. 1 0.8823596
+# 0 vs. 1 0.815286
 table(pred.valid, dt.valid$PRED)
 # pred.valid    0    1
-# 0 8858  336
-# 1  813 1886
+# 1 3492  691
+# 2  803 3096
 confusionMatrix(pred.valid, dt.valid$PRED)
 # Confusion Matrix and Statistics
 # 
 # Reference
 # Prediction    0    1
-# 0 8858  336
-# 1  813 1886
+# 0 3496  675
+# 1  799 3112
 # 
-# Accuracy : 0.9034          
-# 95% CI : (0.8979, 0.9086)
-# No Information Rate : 0.8132          
-# P-Value [Acc > NIR] : < 2.2e-16       
+# Accuracy : 0.8176        
+# 95% CI : (0.809, 0.826)
+# No Information Rate : 0.5314        
+# P-Value [Acc > NIR] : < 2.2e-16     
 # 
-# Kappa : 0.7063          
-# Mcnemar's Test P-Value : < 2.2e-16       
-# 
-# Sensitivity : 0.9159          
-# Specificity : 0.8488          
-# Pos Pred Value : 0.9635          
-# Neg Pred Value : 0.6988          
-# Prevalence : 0.8132          
-# Detection Rate : 0.7448          
-# Detection Prevalence : 0.7731          
-# Balanced Accuracy : 0.8824          
-# 
-# 'Positive' Class : 0  
-# try on test set
+# Kappa : 0.6345        
+# Mcnemar's Test P-Value : 0.001357      
+#                                         
+#             Sensitivity : 0.8140        
+#             Specificity : 0.8218        
+#          Pos Pred Value : 0.8382        
+#          Neg Pred Value : 0.7957        
+#              Prevalence : 0.5314        
+#          Detection Rate : 0.4326        
+#    Detection Prevalence : 0.5161        
+#       Balanced Accuracy : 0.8179        
+#                                         
+#        'Positive' Class : 0 
 pred.test <- predict(md.rf, newdata = dt.test[, !c("ACCOUNT_ID"), with = F])
 table(pred.test)
 # pred.test
-# 0     1 
-# 10772  2163 
+# 0    1 
+# 9801 3134 
 dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, all.y = F)
-write.csv(dt.submit, "submit/4_201115_0909_rf_with_3in1_added_profitloss_relatd_features.csv", row.names = FALSE) # 0.57373
+write.csv(dt.submit, "submit/5_201115_2117_rf_with_3in1_corrected_train_and_valid.csv", row.names = FALSE) # 0.53..
 
 

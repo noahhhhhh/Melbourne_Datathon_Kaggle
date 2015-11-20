@@ -23,7 +23,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 12. **(18/11/15) DONE -** convert the class of each column
 13. **(18/11/15) DONE -** aggregating stdev is problematic
 14. **(18/11/15) DONE -** get the item 6 done!
-15. **(20/11/15) not yet done -** correct the train and valid set!
+15. **(20/11/15) DONE -** correct the train and valid set!
 16. **(20/11/15) not yet done -** verify the ME2ME logic.
 17. **(21/11/15) not yet done -** play around with the cv and validation set to make them consistent with the test set.
 18. **(21/11/15) not yet done -** consider the other STATUS_ID.
