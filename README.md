@@ -23,6 +23,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 12. **(18/11/15) DONE -** convert the class of each column
 13. **(18/11/15) DONE -** aggregating stdev is problematic
 14. **(18/11/15) DONE -** get the item 6 done!
+15. **(20/11/15) DONE -** correct the train and valid set!
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
