@@ -44,8 +44,8 @@ md.rf
 pred.test <- predict(md.rf, newdata = dt.test[, !c("ACCOUNT_ID"), with = F])
 table(pred.test)
 # pred.test
-# 0    1 
-# 9801 3134 
+# 0     1 
+# 10455  2480 
 dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
 write.csv(dt.submit, "submit/6_211115_1297_rf_with_3in1_no_valid.csv", row.names = F) # 0.56465

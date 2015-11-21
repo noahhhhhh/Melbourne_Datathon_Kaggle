@@ -71,6 +71,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 9. **(11/11/15)** Bag and Boosting could be used to stablise the outcome of the model.
 10. **(11/11/15)** The Lasso to shrink predictors --> SVM --> Bag and Boosting.
 11. **(12/11/15)** **3 EVENTS TO COMBINE INTO 1 EVENT TO TRAIN AND TEST!**
+12. **(21/11/15)** why the previous 6 submissions suck? because the **PRE features** are misleading. Suggest to change them to **PRE_IND**, **PRE_AVG**, etc. Also, **LAST_EVENT** features would be considered, such **LAST_EVENT_WON** (1, 0), **LAST_EVENT_PROFIT**, **LAST_EVENT_ME2ME**, etc.
 
 ###Questions
 1. **(07/11/15)** EVENT_ID relfects the event sequence?
