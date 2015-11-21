@@ -48,7 +48,9 @@ setdiff(names(dt0.9), names(dtTestFeatures))
 # [1] "ACCOUNT_ID"                "COUNTRY_OF_RESIDENCE_NAME" "MATCH"                    
 # [4] "PROFIT_LOSS" 
 # get the duplicated rows (duplicated because forgetting to remove BID_TYP from Group in SQL)
-duplicatedCozBID_TYP <- duplicated(dt0.9[, c("ACCOUNT_ID", "EVENT_ID", "INPLAY_BET"), with = F])
+duplicatedCozBID_TYP <- duplicated(dt0.9[, c("ACCOUNT_ID", "COUNTRY_OF_RESIDENCE_NAME"
+                                             , "EVENT_ID", "MATCH"
+                                             , "STATUS_ID", "INPLAY_BET"), with = F])
 # used to esitmate the NO_OF_BID_TYPE
 dt0.9$CNT_BID_TYPE <- duplicatedCozBID_TYP
 dim(dt0.9)
@@ -125,9 +127,9 @@ str(dtTestFeatures)
 # combine
 dt1.0 <- rbind(dt0.9, dtTestFeatures)
 dim(dt0.9); dim(dtTestFeatures); dim(dt1.0)
-# [1] 174226     22
-# [1] 22976    22
-# [1] 197202     22
+# [1] 290978     13
+# [1] 38020    13
+# [1] 328998     13
 
 # # further aggregate
 # dt1.0 <- dt0.9 %>%
