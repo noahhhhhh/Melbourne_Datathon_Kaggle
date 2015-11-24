@@ -27,6 +27,8 @@ The objective is to determine if betting is just guessing, or if past performanc
 16. **(20/11/15) not yet done -** verify the ME2ME logic.
 17. **(21/11/15) not yet done -** play around with the cv and validation set to make them consistent with the test set.
 18. **(21/11/15) not yet done -** consider the other STATUS_ID.
+19. **(22/11/15) DONE -** consider PRE_NO_EVENT_ATTEND + 1 for attended, - 1 for not.
+20. **(22/11/15) not yet done -** consider PRE_LAST ... features.
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.

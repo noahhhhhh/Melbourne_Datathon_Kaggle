@@ -14,7 +14,7 @@ dtSampleSubmit[, Prediction := NULL]
 setnames(dtSampleSubmit, "Account_ID")
 
 #####################################################################
-## 1. try using all the data set except the test set to train a rf ##
+## 1. try using all the data set except the test set to train a rf ## does not perform well (0.56465)
 #####################################################################
 ##############################
 ## 1.1 train and test ########
@@ -50,4 +50,6 @@ dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
 write.csv(dt.submit, "submit/6_211115_1297_rf_with_3in1_no_valid.csv", row.names = F) # 0.56465
 
-######################
+#####################################################################
+## 2. try using all the data set except the test set to train a rf ##
+#####################################################################
