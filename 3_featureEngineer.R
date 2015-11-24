@@ -599,14 +599,16 @@ dt1.1[, ATTENDED_ABSENT := NO_OF_EVENT_ATTENDED - NO_OF_EVENT_ABSENT]
 ####################
 dt1.1 <- dt1.1[order(EVENT_SEQ)]
 dt1.1[, CUM_WIN := cumsum(IND_WIN), by = ACCOUNT_ID]
-dt1.1[, NO_OF_WIN := shift(CUM_WIN, fill = 0, type = "lag"), by = ACCOUNT_ID]
+medNO_OF_WIN <- median(dt1.1$NO_OF_WIN, na.rm = T)
+dt1.1[, NO_OF_WIN := shift(CUM_WIN, fill = medNO_OF_WIN, type = "lag"), by = ACCOUNT_ID]
 
 ####################
 ## NO_OF_LOSE ######
 ####################
 dt1.1 <- dt1.1[order(EVENT_SEQ)]
 dt1.1[, CUM_LOSE := cumsum(IND_LOSE), by = ACCOUNT_ID]
-dt1.1[, NO_OF_LOSE := shift(CUM_LOSE, fill = 0, type = "lag"), by = ACCOUNT_ID]
+medNO_OF_LOSE <- median(dt1.1$NO_OF_LOSE, na.rm = T)
+dt1.1[, NO_OF_LOSE := shift(CUM_LOSE, fill = medNO_OF_LOSE, type = "lag"), by = ACCOUNT_ID]
 
 ####################
 ## RATE_WIN ########
@@ -649,7 +651,8 @@ dt1.1[, MIN_PROFIT_LOSS := shift(CUM_MIN_PROFIT_LOSS, fill = 0, type = "lag"), b
 ####################
 dt1.1 <- dt1.1[order(EVENT_SEQ)]
 dt1.1[, CUM_ME2ME := cumsum(ME2ME), by = ACCOUNT_ID]
-dt1.1[, TIMES_BEING_A_ME2ME := shift(CUM_ME2ME, fill = 0, type = "lag"), by = ACCOUNT_ID]
+medME2ME <- median(dt1.1$ME2ME, na.rm = T)
+dt1.1[, TIMES_BEING_A_ME2ME := shift(CUM_ME2ME, fill = medME2ME, type = "lag"), by = ACCOUNT_ID]
 
 ########################
 ## TIMES_IN_AND_OUT_PLAY
@@ -797,6 +800,212 @@ dt1.1$LOSE_TEAM[dt1.1$EVENT_SEQ == 11] <- "United Kingdom"
 dt1.1[, IS_FROM_WIN := ifelse(COUNTRY_OF_RESIDENCE_NAME == WIN_TEAM, 1, 0)]
 dt1.1[, IS_FROM_LOSE := ifelse(COUNTRY_OF_RESIDENCE_NAME == LOSE_TEAM, 1, 0)]
 dt1.1[, IS_FROM_NEITHER := ifelse(COUNTRY_OF_RESIDENCE_NAME != WIN_TEAM & COUNTRY_OF_RESIDENCE_NAME != LOSE_TEAM , 1, 0)]
+
+####################
+## LAST_PROFIT_LOSS
+####################
+medPROFIT_LOSS <- median(dt1.1$PROFIT_LOSS, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_PROFIT_LOSS := shift(PROFIT_LOSS, fill = medPROFIT_LOSS, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_TRANSACTION_COUNT
+####################
+medTRANSACTION_COUNT <- median(dt1.1$TRANSACTION_COUNT, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_TRANSACTION_COUNT := shift(TRANSACTION_COUNT, fill = medTRANSACTION_COUNT, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_AVG_BET_SIZE
+####################
+medAVG_BET_SIZE <- median(dt1.1$AVG_BET_SIZE, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_AVG_BET_SIZE := shift(AVG_BET_SIZE, fill = medAVG_BET_SIZE, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_MAX_BET_SIZE
+####################
+medMAX_BET_SIZE <- median(dt1.1$MAX_BET_SIZE, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_MAX_BET_SIZE := shift(MAX_BET_SIZE, fill = medMAX_BET_SIZE, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_MIN_BET_SIZE
+####################
+medMIN_BET_SIZE <- median(dt1.1$MIN_BET_SIZE, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_MIN_BET_SIZE := shift(MIN_BET_SIZE, fill = medMIN_BET_SIZE, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_STDEV_BET_SIZE
+####################
+medSTDEV_BET_SIZE <- median(dt1.1$STDEV_BET_SIZE, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_STDEV_BET_SIZE := shift(STDEV_BET_SIZE, fill = medSTDEV_BET_SIZE, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_TRANSACTION_COUNT_INPLAY_BET_Y
+####################
+medTRANSACTION_COUNT_INPLAY_BET_Y <- median(dt1.1$TRANSACTION_COUNT_INPLAY_BET_Y, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_TRANSACTION_COUNT_INPLAY_BET_Y := shift(TRANSACTION_COUNT_INPLAY_BET_Y, fill = medTRANSACTION_COUNT_INPLAY_BET_Y, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_TRANSACTION_COUNT_INPLAY_BET_N
+####################
+medTRANSACTION_COUNT_INPLAY_BET_N <- median(dt1.1$TRANSACTION_COUNT_INPLAY_BET_N, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_TRANSACTION_COUNT_INPLAY_BET_N:= shift(TRANSACTION_COUNT_INPLAY_BET_N, fill = medTRANSACTION_COUNT_INPLAY_BET_N, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_AVG_BET_SIZE_INPLAY_BET_Y
+####################
+medAVG_BET_SIZE_INPLAY_Y <- median(dt1.1$AVG_BET_SIZE_INPLAY_BET_Y, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_AVG_BET_SIZE_INPLAY_BET_Y := shift(AVG_BET_SIZE_INPLAY_BET_Y, fill = medAVG_BET_SIZE_INPLAY_Y, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_AVG_BET_SIZE_INPLAY_BET_N
+####################
+medAVG_BET_SIZE_INPLAY_N <- median(dt1.1$AVG_BET_SIZE_INPLAY_BET_N, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_AVG_BET_SIZE_INPLAY_BET_N := shift(AVG_BET_SIZE_INPLAY_BET_N, fill = medAVG_BET_SIZE_INPLAY_N, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_MAX_BET_SIZE_INPLAY_BET_Y
+####################
+medMAX_BET_SIZE_INPLAY_BET_Y <- median(dt1.1$MAX_BET_SIZE_INPLAY_BET_Y, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_MAX_BET_SIZE_INPLAY_BET_Y := shift(MAX_BET_SIZE_INPLAY_BET_Y, fill = medMAX_BET_SIZE_INPLAY_BET_Y, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_MAX_BET_SIZE_INPLAY_BET_N
+####################
+medMAX_BET_SIZE_INPLAY_BET_N <- median(dt1.1$MAX_BET_SIZE_INPLAY_BET_N, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_MAX_BET_SIZE_INPLAY_BET_N := shift(MAX_BET_SIZE_INPLAY_BET_N, fill = medMAX_BET_SIZE_INPLAY_BET_N, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_MIN_BET_SIZE_INPLAY_BET_Y
+####################
+medMIN_BET_SIZE_INPLAY_BET_Y <- median(dt1.1$MIN_BET_SIZE_INPLAY_BET_Y, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_MIN_BET_SIZE_INPLAY_BET_Y := shift(MIN_BET_SIZE_INPLAY_BET_Y, fill = medMIN_BET_SIZE_INPLAY_BET_Y, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_MIN_BET_SIZE_INPLAY_BET_N
+####################
+medMIN_BET_SIZE_INPLAY_BET_N <- median(dt1.1$MIN_BET_SIZE_INPLAY_BET_N, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_MIN_BET_SIZE_INPLAY_BET_N := shift(MIN_BET_SIZE_INPLAY_BET_N, fill = medMIN_BET_SIZE_INPLAY_BET_N, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_STDEV_BET_SIZE_INPLAY_BET_Y
+####################
+medSTDEV_BET_SIZE_INPLAY_BET_Y <- median(dt1.1$STDEV_BET_SIZE_INPLAY_BET_Y, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_STDEV_BET_SIZE_INPLAY_BET_Y := shift(STDEV_BET_SIZE_INPLAY_BET_Y, fill = medSTDEV_BET_SIZE_INPLAY_BET_Y, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_STDEV_BET_SIZE_INPLAY_BET_N
+####################
+medSTDEV_BET_SIZE_INPLAY_BET_N <- median(dt1.1$STDEV_BET_SIZE_INPLAY_BET_N, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_STDEV_BET_SIZE_INPLAY_BET_N := shift(STDEV_BET_SIZE_INPLAY_BET_N, fill = medSTDEV_BET_SIZE_INPLAY_BET_N, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_NO_OF_BID_TYPE
+####################
+medNO_OF_BID_TYPE <- median(dt1.1$NO_OF_BID_TYPE, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_NO_OF_BID_TYPE := shift(NO_OF_BID_TYPE, fill = medNO_OF_BID_TYPE, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_NO_OF_INPLAY_BET
+####################
+medNO_OF_INPLAY_BET <- median(dt1.1$NO_OF_INPLAY_BET, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_NO_OF_INPLAY_BET := shift(NO_OF_INPLAY_BET, fill = medNO_OF_INPLAY_BET, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_ME2ME
+####################
+medME2ME <- median(dt1.1$ME2ME, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_ME2ME := shift(ME2ME, fill = medME2ME, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_ODDS_1
+####################
+medODDS_1 <- median(dt1.1$ODDS_1, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_ODDS_1 := shift(ODDS_1, fill = medODDS_1, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_ODDS_2
+####################
+medODDS_2 <- median(dt1.1$ODDS_2, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_ODDS_2 := shift(ODDS_2, fill = medODDS_2, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_IND_INPLAY_Y
+####################
+medIND_INPLAY_Y <- median(dt1.1$IND_INPLAY_Y, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_IND_INPLAY_Y := shift(IND_INPLAY_Y, fill = medIND_INPLAY_Y, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_IND_INPLAY_N
+####################
+medIND_INPLAY_N <- median(dt1.1$IND_INPLAY_N, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_IND_INPLAY_N := shift(IND_INPLAY_N, fill = medIND_INPLAY_N, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_IND_RESULT_EXPECTED
+####################
+medIND_RESULT_EXPECTED <- median(dt1.1$IND_RESULT_EXPECTED, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_IND_RESULT_EXPECTED := shift(IND_RESULT_EXPECTED, fill = medIND_RESULT_EXPECTED, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_IND_RESULT_SUPRISED
+####################
+medIND_RESULT_SUPRISED <- median(dt1.1$IND_RESULT_SUPRISED, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_IND_RESULT_SUPRISED := shift(IND_RESULT_SUPRISED, fill = medIND_RESULT_SUPRISED, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_SCORE_DIFF
+####################
+medSCORE_DIFF <- median(dt1.1$SCORE_DIFF, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_SCORE_DIFF := shift(SCORE_DIFF, fill = medSCORE_DIFF, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_IS_FROM_WIN
+####################
+medIS_FROM_WIN <- median(dt1.1$IS_FROM_WIN, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_IS_FROM_WIN := shift(IS_FROM_WIN, fill = medIS_FROM_WIN, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_IS_FROM_LOSE
+####################
+medIS_FROM_LOSE <- median(dt1.1$IS_FROM_LOSE, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_IS_FROM_LOSE := shift(IS_FROM_LOSE, fill = medIS_FROM_LOSE, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_IS_FROM_NEITHER
+####################
+medIS_FROM_NEITHER <- median(dt1.1$IS_FROM_NEITHER, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_IS_FROM_NEITHER := shift(IS_FROM_NEITHER, fill = medIS_FROM_NEITHER, type = "lag"), by = ACCOUNT_ID]
+
+dim(dt1.1)
+# [1] 197202    100
 
 ##############################
 ## save it ###################

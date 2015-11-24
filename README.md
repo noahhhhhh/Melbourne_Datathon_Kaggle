@@ -28,7 +28,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 17. **(21/11/15) not yet done -** play around with the cv and validation set to make them consistent with the test set.
 18. **(21/11/15) not yet done -** consider the other STATUS_ID.
 19. **(22/11/15) DONE -** consider PRE_NO_EVENT_ATTEND + 1 for attended, - 1 for not.
-20. **(22/11/15) not yet done -** consider PRE_LAST ... features.
+20. **(22/11/15) DONE -** consider PRE_LAST ... features.
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
@@ -58,7 +58,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 14. **(11/11/15) DONE -** **MAX_PROFIT_LOSS_PER_EVENT**
 15. **(11/11/15) DONE -** **MIN_PROFIT_LOSS_PER_EVENT**
 16. **(11/11/15) DONE -** **AVG_PROFIT_LOSS_PER_EVENT**
-17. **(11/11/15) not done yet -** **AVG_PROFIT_LOSS_LAST_ATTENDED_EVENT**
+17. **(11/11/15) DONE -** **AVG_PROFIT_LOSS_LAST_ATTENDED_EVENT**
 18. **(12/11/15) DONE -** Phil's **WIN_LOSE** (WIN: +1; LOSE: -1)
 
 ###Initial Thoughts
