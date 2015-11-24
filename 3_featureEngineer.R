@@ -429,17 +429,6 @@ ODDS <- data.table(EVENT_SEQ = 46:1, ODDS_1 = ODDS_1, ODDS_2 = ODDS_2)
 dt1.1 <- merge(dt1.1, ODDS, by = "EVENT_SEQ")
 
 ####################
-## INPLAY_Y AND INPLAY_N
-####################
-dt1.1[, IND_INPLAY_Y := ifelse(INPLAY_BET == "Y", 1, 0)]
-dt1.1[, IND_INPLAY_N := ifelse(INPLAY_BET == "N", 1, 0)]
-dt1.1[, CUM_INPLAY_Y := cumsum(IND_INPLAY_Y), by = ACCOUNT_ID]
-dt1.1[, CUM_INPLAY_N := cumsum(IND_INPLAY_N), by = ACCOUNT_ID]
-
-dt1.1[, TIMES_INPLAY_Y := shift(CUM_INPLAY_Y, fill = 0, type = "lag"), by = ACCOUNT_ID]
-dt1.1[, TIMES_INPLAY_N := shift(CUM_INPLAY_N, fill = 0, type = "lag"), by = ACCOUNT_ID]
-
-####################
 ## RESULT ##########
 ####################
 RESULT <- c("AS_EXPECTED"
@@ -555,6 +544,41 @@ SCORE_DIFF <- data.table(EVENT_SEQ = 46:1, SCORE_DIFF = SCORE_DIFF)
 dt1.1 <- merge(dt1.1, SCORE_DIFF, by = "EVENT_SEQ")
 
 ####################
+## NO_OF_EVENT_ATTENDED
+####################
+dt1.1[, ATTENDED := 1]
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, CUM_ATTENDED := cumsum(ATTENDED), by = ACCOUNT_ID]
+dt1.1[, NO_OF_EVENT_ATTENDED := shift(CUM_ATTENDED, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## NO_OF_EVENT_ABSENT
+####################
+dt1.1[, NO_OF_EVENT_ABSENT := EVENT_SEQ - NO_OF_EVENT_ATTENDED - 1]
+
+####################
+## ATTENDED_ABSENT #
+####################
+dt1.1[, ATTENDED_ABSENT := NO_OF_EVENT_ATTENDED - NO_OF_EVENT_ABSENT]
+
+####################
+## TIMES_INPLAY_Y AND TIMES_INPLAY_N
+####################
+dt1.1[, IND_INPLAY_Y := ifelse(INPLAY_BET == "Y", 1, 0)]
+dt1.1[, IND_INPLAY_N := ifelse(INPLAY_BET == "N", 1, 0)]
+dt1.1[, CUM_INPLAY_Y := cumsum(IND_INPLAY_Y), by = ACCOUNT_ID]
+dt1.1[, CUM_INPLAY_N := cumsum(IND_INPLAY_N), by = ACCOUNT_ID]
+
+dt1.1[, TIMES_INPLAY_Y := shift(CUM_INPLAY_Y, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, TIMES_INPLAY_N := shift(CUM_INPLAY_N, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## PERC_INPLAY_Y AND PERC_INPLAY_N
+####################
+dt1.1[, PERC_INPLAY_Y := ifelse(NO_OF_EVENT_ATTENDED == 0, 0, TIMES_INPLAY_Y / NO_OF_EVENT_ATTENDED)]
+dt1.1[, PERC_INPLAY_N := ifelse(NO_OF_EVENT_ATTENDED == 0, 0, TIMES_INPLAY_N / NO_OF_EVENT_ATTENDED)]
+
+####################
 ## IND_WIN #########
 ####################
 dt1.1[, IND_WIN := ifelse(PROFIT_LOSS > 0, 1, 0)]
@@ -575,24 +599,6 @@ dt1.1[, IND_LOSE := ifelse(PROFIT_LOSS <= 0, -1, 0)]
 ####################
 dt1.1 <- dt1.1[order(EVENT_SEQ)]
 dt1.1[, PRE_IND_LAST_LOSE := shift(IND_LOSE, fill = 0, type = "lag"), by = ACCOUNT_ID]
-
-####################
-## NO_OF_EVENT_ATTENDED
-####################
-dt1.1[, ATTENDED := 1]
-dt1.1 <- dt1.1[order(EVENT_SEQ)]
-dt1.1[, CUM_ATTENDED := cumsum(ATTENDED), by = ACCOUNT_ID]
-dt1.1[, NO_OF_EVENT_ATTENDED := shift(CUM_ATTENDED, fill = 0, type = "lag"), by = ACCOUNT_ID]
-
-####################
-## NO_OF_EVENT_ABSENT
-####################
-dt1.1[, NO_OF_EVENT_ABSENT := EVENT_SEQ - NO_OF_EVENT_ATTENDED - 1]
-
-####################
-## ATTENDED_ABSENT #
-####################
-dt1.1[, ATTENDED_ABSENT := NO_OF_EVENT_ATTENDED - NO_OF_EVENT_ABSENT]
 
 ####################
 ## NO_OF_WIN #######
@@ -654,6 +660,12 @@ dt1.1[, CUM_ME2ME := cumsum(ME2ME), by = ACCOUNT_ID]
 medME2ME <- median(dt1.1$ME2ME, na.rm = T)
 dt1.1[, TIMES_BEING_A_ME2ME := shift(CUM_ME2ME, fill = medME2ME, type = "lag"), by = ACCOUNT_ID]
 
+####################
+## PERC_BEING_A_ME2ME
+####################
+dt1.1[, PERC_BEING_A_ME2ME := ifelse(NO_OF_EVENT_ATTENDED == 0, 0, TIMES_BEING_A_ME2ME / NO_OF_EVENT_ATTENDED)]
+
+
 ########################
 ## TIMES_IN_AND_OUT_PLAY
 ########################
@@ -661,6 +673,11 @@ dt1.1 <- dt1.1[order(EVENT_SEQ)]
 dt1.1[, IND_IN_AND_OUT_PAY := ifelse(NO_OF_INPLAY_BET == 2, 1, 0)]
 dt1.1[, CUM_IN_AND_OUT_PLAY := cumsum(IND_IN_AND_OUT_PAY), by = ACCOUNT_ID]
 dt1.1[, TIMES_IN_AND_OUT_PLAY := shift(CUM_IN_AND_OUT_PLAY, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## PERC_IN_AND_OUT_PLAY
+####################
+dt1.1[, PERC_IN_AND_OUT_PLAY := ifelse(NO_OF_EVENT_ATTENDED == 0, 0, TIMES_IN_AND_OUT_PLAY / NO_OF_EVENT_ATTENDED)]
 
 ####################
 ## IS_FROM_WIN, IS_FROM_LOSE, IS_FROM_NEITHER
