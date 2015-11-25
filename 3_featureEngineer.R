@@ -200,6 +200,38 @@ dim(dt1.1)
 ## 1.4 feature cleansing #####
 ##############################
 ####################
+## EARLY_PLACERS ###
+####################
+dtEarly <- dt %>%
+    group_by(EVENT_ID, ACCOUNT_ID, OFF_DT) %>%
+    summarise(MIN_PLCAED_DT_PER_MATCH = min(PLACED_DATE))
+
+dtEarly[, TIME_DIFF := as.numeric(OFF_DT - MIN_PLCAED_DT_PER_MATCH)]
+dtEarly[, RANK := rank(MIN_PLCAED_DT_PER_MATCH), by = "EVENT_ID"]
+dtEarly[, NO_OF_ACCT := n_distinct(ACCOUNT_ID), by = "EVENT_ID"]
+
+dtEarly[, TOP_1 := ifelse(RANK / NO_OF_ACCT <= .01, 1, 0)]
+dtEarly[, TOP_2 := ifelse(RANK / NO_OF_ACCT <= .02, 1, 0)]
+dtEarly[, TOP_5 := ifelse(RANK / NO_OF_ACCT <= .05, 1, 0)]
+dtEarly[, TOP_10 := ifelse(RANK / NO_OF_ACCT <= .1, 1, 0)]
+dtEarly[, TOP_15 := ifelse(RANK / NO_OF_ACCT <= .15, 1, 0)]
+dtEarly[, TOP_20 := ifelse(RANK / NO_OF_ACCT <= .2, 1, 0)]
+dtEarly[, TOP_25 := ifelse(RANK / NO_OF_ACCT <= .25, 1, 0)]
+
+dtEarly[, BOTTOM_1 := ifelse(RANK / NO_OF_ACCT >= .99, 1, 0)]
+dtEarly[, BOTTOM_2 := ifelse(RANK / NO_OF_ACCT >= .98, 1, 0)]
+dtEarly[, BOTTOM_5 := ifelse(RANK / NO_OF_ACCT >= .95, 1, 0)]
+dtEarly[, BOTTOM_10 := ifelse(RANK / NO_OF_ACCT >= .9, 1, 0)]
+dtEarly[, BOTTOM_15 := ifelse(RANK / NO_OF_ACCT >= .85, 1, 0)]
+dtEarly[, BOTTOM_20 := ifelse(RANK / NO_OF_ACCT >= .8, 1, 0)]
+dtEarly[, BOTTOM_25 := ifelse(RANK / NO_OF_ACCT >= .75, 1, 0)]
+
+dtEarly[, EVENT_ID := as.integer(EVENT_ID)]
+dtEarly[, ACCOUNT_ID := as.integer(ACCOUNT_ID)]
+dt1.1 <- merge(dt1.1, dtEarly, by = c("EVENT_ID", "ACCOUNT_ID"), all.x = T)
+
+apply(dt1.1, 2, function (x) mean(is.na(x)))
+####################
 ## INPLAY_BET ######
 ####################
 dt1.1$INPLAY_BET <- ifelse(dt1.1$MAX_BET_SIZE_INPLAY_BET_Y == -Inf, "N"
@@ -209,31 +241,61 @@ dt1.1$INPLAY_BET <- ifelse(dt1.1$MAX_BET_SIZE_INPLAY_BET_Y == -Inf, "N"
 ####################
 # before
 apply(dt1.1, 2, function(x) sum(is.na(x)))
-# ACCOUNT_ID      COUNTRY_OF_RESIDENCE_NAME                       EVENT_ID 
-# 0.00000000                     0.01507304                     0.00000000 
+# EVENT_ID                     ACCOUNT_ID      COUNTRY_OF_RESIDENCE_NAME 
+# 0                              0                           3907 
 # MATCH                    PROFIT_LOSS              TRANSACTION_COUNT 
-# 0.00000000                     0.00000000                     0.00000000 
+# 0                              0                              0 
 # AVG_BET_SIZE                   MAX_BET_SIZE                   MIN_BET_SIZE 
-# 0.00000000                     0.00000000                     0.00000000 
+# 0                              0                              0 
 # STDEV_BET_SIZE TRANSACTION_COUNT_INPLAY_BET_Y TRANSACTION_COUNT_INPLAY_BET_N 
-# 0.33665250                     0.00000000                     0.00000000 
+# 94161                              0                              0 
 # AVG_BET_SIZE_INPLAY_BET_Y      AVG_BET_SIZE_INPLAY_BET_N      MAX_BET_SIZE_INPLAY_BET_Y 
-# 0.12586399                     0.56085143                     0.00000000 
+# 38832                         120820                              0 
 # MAX_BET_SIZE_INPLAY_BET_N      MIN_BET_SIZE_INPLAY_BET_Y      MIN_BET_SIZE_INPLAY_BET_N 
-# 0.00000000                     0.00000000                     0.00000000 
+# 0                              0                              0 
 # STDEV_BET_SIZE_INPLAY_BET_Y    STDEV_BET_SIZE_INPLAY_BET_N                 NO_OF_BID_TYPE 
-# 0.35023313                     0.35023313                     0.00000000 
-# NO_OF_INPLAY_BET                     INPLAY_BET 
-# 0.00000000                     0.00000000
+# 95719                          95719                              0 
+# NO_OF_INPLAY_BET                         OFF_DT        MIN_PLCAED_DT_PER_MATCH 
+# 0                          22976                          22976 
+# TIME_DIFF                           RANK                     NO_OF_ACCT 
+# 22976                          22976                          22976 
+# TOP_1                          TOP_2                          TOP_5 
+# 22976                          22976                          22976 
+# TOP_10                         TOP_15                         TOP_20 
+# 22976                          22976                          22976 
+# TOP_25                       BOTTOM_1                       BOTTOM_2 
+# 22976                          22976                          22976 
+# BOTTOM_5                      BOTTOM_10                      BOTTOM_15 
+# 22976                          22976                          22976 
+# BOTTOM_20                      BOTTOM_25                     INPLAY_BET 
+# 22976                          22976                              0 
 dt1.1$COUNTRY_OF_RESIDENCE_NAME[is.na(dt1.1$COUNTRY_OF_RESIDENCE_NAME)] <- "Unknown"
 dt1.1$STDEV_BET_SIZE[is.na(dt1.1$STDEV_BET_SIZE)] <- 0
 dt1.1$AVG_BET_SIZE_INPLAY_BET_Y[is.na(dt1.1$AVG_BET_SIZE_INPLAY_BET_Y)] <- 0
 dt1.1$AVG_BET_SIZE_INPLAY_BET_N[is.na(dt1.1$AVG_BET_SIZE_INPLAY_BET_N)] <- 0
 dt1.1$STDEV_BET_SIZE_INPLAY_BET_Y[is.na(dt1.1$STDEV_BET_SIZE_INPLAY_BET_Y)] <- 0
 dt1.1$STDEV_BET_SIZE_INPLAY_BET_N[is.na(dt1.1$STDEV_BET_SIZE_INPLAY_BET_N)] <- 0
+
+dt1.1$TIME_DIFF[is.na(dt1.1$TIME_DIFF)] <- 0
+dt1.1$TOP_1[is.na(dt1.1$TOP_1)] <- 0
+dt1.1$TOP_2[is.na(dt1.1$TOP_2)] <- 0
+dt1.1$TOP_5[is.na(dt1.1$TOP_5)] <- 0
+dt1.1$TOP_10[is.na(dt1.1$TOP_10)] <- 0
+dt1.1$TOP_15[is.na(dt1.1$TOP_15)] <- 0
+dt1.1$TOP_20[is.na(dt1.1$TOP_20)] <- 0
+dt1.1$TOP_25[is.na(dt1.1$TOP_25)] <- 0
+
+dt1.1$BOTTOM_1[is.na(dt1.1$BOTTOM_1)] <- 0
+dt1.1$BOTTOM_2[is.na(dt1.1$BOTTOM_2)] <- 0
+dt1.1$BOTTOM_5[is.na(dt1.1$BOTTOM_5)] <- 0
+dt1.1$BOTTOM_10[is.na(dt1.1$BOTTOM_10)] <- 0
+dt1.1$BOTTOM_15[is.na(dt1.1$BOTTOM_15)] <- 0
+dt1.1$BOTTOM_20[is.na(dt1.1$BOTTOM_20)] <- 0
+dt1.1$BOTTOM_25[is.na(dt1.1$BOTTOM_25)] <- 0
+
 # after
 apply(dt1.1, 2, function(x) sum(is.na(x)))
-# ACCOUNT_ID      COUNTRY_OF_RESIDENCE_NAME                       EVENT_ID 
+# EVENT_ID                     ACCOUNT_ID      COUNTRY_OF_RESIDENCE_NAME 
 # 0                              0                              0 
 # MATCH                    PROFIT_LOSS              TRANSACTION_COUNT 
 # 0                              0                              0 
@@ -247,8 +309,20 @@ apply(dt1.1, 2, function(x) sum(is.na(x)))
 # 0                              0                              0 
 # STDEV_BET_SIZE_INPLAY_BET_Y    STDEV_BET_SIZE_INPLAY_BET_N                 NO_OF_BID_TYPE 
 # 0                              0                              0 
-# NO_OF_INPLAY_BET                     INPLAY_BET 
-# 0                              0 
+# NO_OF_INPLAY_BET                         OFF_DT        MIN_PLCAED_DT_PER_MATCH 
+# 0                          22976                          22976 
+# TIME_DIFF                           RANK                     NO_OF_ACCT 
+# 0                          22976                          22976 
+# TOP_1                          TOP_2                          TOP_5 
+# 0                              0                              0 
+# TOP_10                         TOP_15                         TOP_20 
+# 0                              0                              0 
+# TOP_25                       BOTTOM_1                       BOTTOM_2 
+# 0                              0                              0 
+# BOTTOM_5                      BOTTOM_10                      BOTTOM_15 
+# 0                              0                              0 
+# BOTTOM_20                      BOTTOM_25                     INPLAY_BET 
+# 0                              0                              0 
 
 ####################
 ## Inf, -Inf #######
@@ -491,6 +565,12 @@ dt1.1[, TIMES_ATTENDING_EXPECTED_EVENT := shift(CUM_RESULT_EXPECTED, fill = 0, t
 dt1.1[, TIMES_ATTENDING_SUPRISED_EVENT := shift(CUM_RESULT_SUPRISED, fill = 0, type = "lag"), by = ACCOUNT_ID]
 
 ####################
+## PERC_ATTENDING_EXPECTED_EVENT AND PERC_ATTENDING_SUPRISED_EVENT ######
+####################
+dt1.1[, PERC_ATTENDING_EXPECTED_EVENT := ifelse(NO_OF_EVENT_ATTENDED == 0, 0, TIMES_ATTENDING_EXPECTED_EVENT / NO_OF_EVENT_ATTENDED)]
+dt1.1[, PERC_ATTENDING_SUPRISED_EVENT := ifelse(NO_OF_EVENT_ATTENDED == 0, 0, TIMES_ATTENDING_SUPRISED_EVENT / NO_OF_EVENT_ATTENDED)]
+
+####################
 ## SCORE_DIFF ######
 ####################
 SCORE_DIFF <- c(abs(138-136),
@@ -619,8 +699,7 @@ dt1.1[, NO_OF_LOSE := shift(CUM_LOSE, fill = medNO_OF_LOSE, type = "lag"), by = 
 ####################
 ## RATE_WIN ########
 ####################
-dt1.1[, RATE_WIN := NO_OF_WIN / NO_OF_EVENT_ATTENDED]
-dt1.1$RATE_WIN[is.nan(dt1.1$RATE_WIN)] <- .5
+dt1.1[, RATE_WIN := ifelse(NO_OF_EVENT_ATTENDED == 0, .5, NO_OF_WIN / NO_OF_EVENT_ATTENDED)]
 
 ####################
 ## WIN_LOSE ########
@@ -1023,6 +1102,49 @@ dt1.1[, LAST_IS_FROM_NEITHER := shift(IS_FROM_NEITHER, fill = medIS_FROM_NEITHER
 
 dim(dt1.1)
 # [1] 197202    100
+
+##############################
+## convert class #############
+##############################
+str(dt1.1)
+dt1.1[, TOP_1 := as.factor(TOP_1)]
+dt1.1[, TOP_2 := as.factor(TOP_1)]
+dt1.1[, TOP_5 := as.factor(TOP_1)]
+dt1.1[, TOP_10 := as.factor(TOP_1)]
+dt1.1[, TOP_15 := as.factor(TOP_1)]
+dt1.1[, TOP_20 := as.factor(TOP_1)]
+dt1.1[, TOP_25 := as.factor(TOP_1)]
+dt1.1[, BOTTOM_1 := as.factor(BOTTOM_1)]
+dt1.1[, BOTTOM_2 := as.factor(BOTTOM_2)]
+dt1.1[, BOTTOM_5 := as.factor(BOTTOM_5)]
+dt1.1[, BOTTOM_10 := as.factor(BOTTOM_10)]
+dt1.1[, BOTTOM_15 := as.factor(BOTTOM_15)]
+dt1.1[, BOTTOM_20 := as.factor(BOTTOM_20)]
+dt1.1[, BOTTOM_25 := as.factor(BOTTOM_25)]
+
+dt1.1[, INPLAY_BET := as.factor(INPLAY_BET)]
+dt1.1[, ME2ME := as.factor(ME2ME)]
+dt1.1[, RESULT := as.factor(RESULT)]
+dt1.1[, IND_RESULT_EXPECTED := as.factor(IND_RESULT_EXPECTED)]
+dt1.1[, IND_RESULT_SUPRISED := as.factor(IND_RESULT_SUPRISED)]
+dt1.1[, ATTENDED := as.factor(ATTENDED)]
+dt1.1[, IND_INPLAY_Y := as.factor(IND_INPLAY_Y)]
+dt1.1[, IND_INPLAY_N := as.factor(IND_INPLAY_N)]
+dt1.1[, IND_WIN := as.factor(IND_WIN)]
+dt1.1[, IND_LOSE := as.factor(IND_LOSE)]
+dt1.1[, IND_IN_AND_OUT_PAY := as.factor(IND_IN_AND_OUT_PAY)]
+dt1.1[, IS_FROM_WIN := as.factor(IS_FROM_WIN)]
+dt1.1[, IS_FROM_LOSE := as.factor(IS_FROM_LOSE)]
+dt1.1[, IS_FROM_NEITHER := as.factor(IS_FROM_NEITHER)]
+
+dt1.1[, LAST_ME2ME := as.factor(LAST_ME2ME)]
+dt1.1[, LAST_IND_INPLAY_Y := as.factor(LAST_IND_INPLAY_Y)]
+dt1.1[, LAST_IND_INPLAY_N := as.factor(LAST_IND_INPLAY_N)]
+dt1.1[, LAST_IND_RESULT_EXPECTED := as.factor(LAST_IND_RESULT_EXPECTED)]
+dt1.1[, LAST_IND_RESULT_SUPRISED := as.factor(LAST_IND_RESULT_SUPRISED)]
+dt1.1[, LAST_IS_FROM_WIN := as.factor(LAST_IS_FROM_WIN)]
+dt1.1[, LAST_IS_FROM_LOSE := as.factor(LAST_IS_FROM_LOSE)]
+dt1.1[, LAST_IS_FROM_NEITHER := as.factor(LAST_IS_FROM_NEITHER)]
 
 ##############################
 ## save it ###################
