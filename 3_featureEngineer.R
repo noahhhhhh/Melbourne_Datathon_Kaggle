@@ -605,7 +605,7 @@ dt1.1[, PRE_IND_LAST_LOSE := shift(IND_LOSE, fill = 0, type = "lag"), by = ACCOU
 ####################
 dt1.1 <- dt1.1[order(EVENT_SEQ)]
 dt1.1[, CUM_WIN := cumsum(IND_WIN), by = ACCOUNT_ID]
-medNO_OF_WIN <- median(dt1.1$NO_OF_WIN, na.rm = T)
+medNO_OF_WIN <- median(dt1.1$CUM_WIN, na.rm = T)
 dt1.1[, NO_OF_WIN := shift(CUM_WIN, fill = medNO_OF_WIN, type = "lag"), by = ACCOUNT_ID]
 
 ####################
@@ -613,7 +613,7 @@ dt1.1[, NO_OF_WIN := shift(CUM_WIN, fill = medNO_OF_WIN, type = "lag"), by = ACC
 ####################
 dt1.1 <- dt1.1[order(EVENT_SEQ)]
 dt1.1[, CUM_LOSE := cumsum(IND_LOSE), by = ACCOUNT_ID]
-medNO_OF_LOSE <- median(dt1.1$NO_OF_LOSE, na.rm = T)
+medNO_OF_LOSE <- median(dt1.1$CUM_LOSE, na.rm = T)
 dt1.1[, NO_OF_LOSE := shift(CUM_LOSE, fill = medNO_OF_LOSE, type = "lag"), by = ACCOUNT_ID]
 
 ####################
