@@ -13,7 +13,6 @@ load("../Datathon_Full_Dataset/engineeredData.RData")
 dtSampleSubmit <- fread("../data_files/sample_submission_bet_size.csv")
 dtSampleSubmit[, Prediction := NULL]
 setnames(dtSampleSubmit, "Account_ID")
-
 #####################################################################
 ## 1. try using all 3in1 the data set except the test set to train a rf ## does not perform well (0.56465)
 #####################################################################
@@ -55,7 +54,7 @@ write.csv(dt.submit, "submit/6_211115_1297_rf_with_3in1_no_valid.csv", row.names
 ## 2. try 1.1 data on lasso regression ##############################
 #####################################################################
 ##############################
-## 1.1 filter features #######
+## 2.1 filter features #######
 ##############################
 dt.ready <- dt1.1[, !c("EVENT_ID", "COUNTRY_OF_RESIDENCE_NAME", "MATCH"
                        , "OFF_DT", "MIN_PLCAED_DT_PER_MATCH", "RANK", "NO_OF_ACCT", "INPLAY_BET", "RESULT"
@@ -71,7 +70,7 @@ dt.ready <- dt1.1[, !c("EVENT_ID", "COUNTRY_OF_RESIDENCE_NAME", "MATCH"
 dim(dt.ready)
 # [1] 197202     90
 ##############################
-## 1.2 scale #################
+## 3.2 scale #################
 ##############################
 facts <- sapply(dt.ready, is.factor)
 dt.readyForScale <- dt.ready[, !facts, with = F]
@@ -89,7 +88,7 @@ dim(dt.scaledAll)
 # [1] 197202     90
 
 ##############################
-## 1.3 train and test ########
+## 3.3 train and test ########
 ##############################
 # train
 dt.train <- dt.scaledAll[!EVENT_SEQ %in% c(43, 44, 45, 46), with = T]
@@ -106,7 +105,7 @@ dim(dt.valid)
 # [1] 4409   89
 
 ##############################
-## 1.4 model - the lasso #####
+## 4.4 model - the lasso #####
 ##############################
 require(glmnet)
 x.train <- model.matrix(PRED ~., dt.train[, !c("ACCOUNT_ID"), with = F])[, -1]
@@ -137,6 +136,106 @@ coef.lasso
 coef.lasso[coef.lasso != 0]
 
 #####################################################################
-## 2. try 1.1 data on lasso regression ##############################
+## 3. try 3in1 data on xgboost ######################################
 #####################################################################
+##############################
+## 3.1 train, valid, and test transform
+##############################
+require(xgboost)
+x.train <- model.matrix(PRED ~., dt.train[, !c("ACCOUNT_ID", "THIS_RESULT_EXPECTED", "THIS_RESULT_SUPRISED"), with = F])[, -1]
+y.train <- ifelse(as.integer(dt.train$PRED) == 1, 0, 1)
+dmx.train <- xgb.DMatrix(data =  x.train, label = y.train)
+
+x.valid1 <- model.matrix(PRED ~., dt.valid1[, !c("ACCOUNT_ID", "THIS_RESULT_EXPECTED", "THIS_RESULT_SUPRISED"), with = F])[, -1]
+y.valid1 <- ifelse(as.integer(dt.valid1$PRED) == 1, 0, 1)
+dmx.valid1 <- xgb.DMatrix(data =  x.valid1, label = y.valid1)
+
+x.valid2 <- model.matrix(PRED ~., dt.valid2[, !c("ACCOUNT_ID", "THIS_RESULT_EXPECTED", "THIS_RESULT_SUPRISED"), with = F])[, -1]
+y.valid2 <- ifelse(as.integer(dt.valid2$PRED) == 1, 0, 1)
+dmx.valid2 <- xgb.DMatrix(data =  x.valid2, label = y.valid2)
+
+x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID", "THIS_RESULT_EXPECTED", "THIS_RESULT_SUPRISED"), with = F])[, -1]
+
+##############################
+## 3.2 model - xgboost
+##############################
+trainControlxgbTree <- trainControl(method = "boot",number = 4,repeats = 1,#summaryFunction = twoClassSummary,
+                                    verboseIter = TRUE,
+                                    preProcOptions = list(thresh = 0.999,ICAcomp = 111)
+)
+
+md.xgboost <- xgb.train(data = dmx.train
+                      , params = list(nthread = 8
+                                      , eval_metric = "auc"
+                                      , eta = .05
+                                      , subsample = .8
+                                      , colsample_bytree = .3)
+                      , watchlist = list(eval1 = dmx.valid1
+                                         , eval2 = dmx.valid2
+                                         , train = dmx.train)
+                      , nrounds = 150
+                      , verbose = T)
+
+pred.valid1 <- predict(md.xgboost, x.valid1)
+colAUC(pred.valid1, y.valid1)
+# [,1]
+# 0 vs. 1 0.6911533
+# 
+# md.xgboost <- train(x = x.train,
+#                     y = y.train,
+#                     method = "xgbTree",
+#                     tuneGrid = expand.grid(nrounds = 10*(1:15),
+#                                            eta = 0.05,
+#                                            max_depth = 2),
+#                     trControl = trainControlxgbTree,
+#                     watchlist = list(val = dmx.valid1 ,train = dmx.train),
+#                     eval_metric = "auc",
+#                     min_child_weight = 10,
+#                     #early.stop.round = 40,
+#                     #printEveryN = 20,
+#                     subsample = 0.6,
+#                     verbose = 0,
+#                     colsample_bytree =0.8,
+#                     base_score = 0.5,
+#                     nthread =8#,
+#                     #preProcess = c("center","scale")
+#                     #                        ,tuneLength = 100
+# )
+
+pred.test <- predict(md.xgboost, newdata = x.test)
+table(pred.test)
+# pred.test
+# 0     1 
+# 10455  2480 
+dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
+dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
+write.csv(dt.submit, "submit/7_261115_2054_xgboost_with_3in1_valid1_valid2.csv", row.names = F) # 0.56465
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

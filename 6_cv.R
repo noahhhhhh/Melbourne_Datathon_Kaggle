@@ -12,25 +12,6 @@ load("../Datathon_Full_Dataset/transformedData.RData")
 dtSampleSubmit <- fread("../data_files/sample_submission_bet_size.csv")
 dtSampleSubmit[, Prediction := NULL]
 setnames(dtSampleSubmit, "Account_ID")
-
-#######################################
-## 1.0 scale ##########################
-#######################################
-##############################
-## 1.1 scale all together ####
-##############################
-dt.scaledAll <- as.data.table(scale(dt.3in1[, !c("UNIT", "ACCOUNT_ID"
-                                   , "THIS_ME2ME", "THIS_IN_AND_OUT_PLAY", "THIS_IS_FROM_WIN"
-                                   , "THIS_IS_FROM_LOSE", "THIS_IS_FROM_NEITHER", "THIS_RESULT_EXPECTED"
-                                   , "PRED"), with = F]))
-
-dt.scaledAll <- cbind(dt.3in1[, c("UNIT", "ACCOUNT_ID"
-                                  , "THIS_ME2ME", "THIS_IN_AND_OUT_PLAY", "THIS_IS_FROM_WIN"
-                                  , "THIS_IS_FROM_LOSE", "THIS_IS_FROM_NEITHER", "THIS_RESULT_EXPECTED"
-                                  , "PRED"), with = F]
-                      , dt.scaledAll)
-
-str(dt.scaledAll)
 #######################################
 ## 1.0 train, valid, and test set #####
 #######################################
