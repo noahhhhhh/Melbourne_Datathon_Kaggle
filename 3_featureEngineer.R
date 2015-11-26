@@ -1024,6 +1024,37 @@ dt1.1 <- dt1.1[order(EVENT_SEQ)]
 dt1.1[, LAST_NO_OF_INPLAY_BET := shift(NO_OF_INPLAY_BET, fill = medNO_OF_INPLAY_BET, type = "lag"), by = ACCOUNT_ID]
 
 ####################
+## LAST_TIME_DIFF
+####################
+medTIME_DIFF <- median(dt1.1$TIME_DIFF, na.rm = T)
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_TIME_DIFF := shift(TIME_DIFF, fill = medTIME_DIFF, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_TOP
+####################
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_TOP_1 := shift(TOP_1, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_TOP_2 := shift(TOP_2, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_TOP_5 := shift(TOP_5, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_TOP_10 := shift(TOP_10, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_TOP_15 := shift(TOP_15, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_TOP_20 := shift(TOP_20, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_TOP_25 := shift(TOP_25, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
+## LAST_BOTTOM
+####################
+dt1.1 <- dt1.1[order(EVENT_SEQ)]
+dt1.1[, LAST_BOTTOM_1 := shift(BOTTOM_1, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_BOTTOM_2 := shift(BOTTOM_2, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_BOTTOM_5 := shift(BOTTOM_5, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_BOTTOM_10 := shift(BOTTOM_10, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_BOTTOM_15 := shift(BOTTOM_15, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_BOTTOM_20 := shift(BOTTOM_20, fill = 0, type = "lag"), by = ACCOUNT_ID]
+dt1.1[, LAST_BOTTOM_25 := shift(BOTTOM_25, fill = 0, type = "lag"), by = ACCOUNT_ID]
+
+####################
 ## LAST_ME2ME
 ####################
 medME2ME <- median(dt1.1$ME2ME, na.rm = T)

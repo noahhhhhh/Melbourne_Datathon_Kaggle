@@ -94,10 +94,14 @@ dim(dt.scaledAll)
 # train
 dt.train <- dt.scaledAll[!EVENT_SEQ %in% c(43, 44, 45, 46), with = T]
 dt.train <- dt.train[, EVENT_SEQ := NULL]
+dt.train[, PRED := as.factor(ifelse(PROFIT_LOSS > 0, 1, 0))]
+dt.train[, PROFIT_LOSS := NULL]
 dim(dt.train)
 # [1] 169817     89
 dt.valid <- dt.scaledAll[EVENT_SEQ == 43, with = T]
 dt.valid <- dt.valid[, EVENT_SEQ := NULL]
+dt.valid[, PRED := as.factor(ifelse(PROFIT_LOSS > 0, 1, 0))]
+dt.valid[, PROFIT_LOSS := NULL]
 dim(dt.valid)
 # [1] 4409   89
 
@@ -105,24 +109,34 @@ dim(dt.valid)
 ## 1.4 model - the lasso #####
 ##############################
 require(glmnet)
-x <- model.matrix(PROFIT_LOSS ~., dt.train)[, -1]
-y <- dt.train$PROFIT_LOSS
+x.train <- model.matrix(PRED ~., dt.train[, !c("ACCOUNT_ID"), with = F])[, -1]
+y.train <- dt.train$PRED
 grid <- 10^seq(10, -2, length = 100)
 
 # train
-md.lasso <- glmnet(x, y, alpha = 1, lambda = grid, standardize = F)
+md.lasso <- glmnet(x.train, y.train, alpha = 1, lambda = grid, family = "binomial")
 plot(md.lasso)
 
 # cv to choose λ
 set.seed(1)
-cv.out <- cv.glmnet(x, y, alpha = 1)
+cv.out <- cv.glmnet(x.train, y.train, alpha = 1, type.measure = "auc", family = "binomial")
 plot(cv.out)
 bestlam <- cv.out$lambda.min
+bestlam
 
 # valid
-x.valid <- model.matrix(PROFIT_LOSS ~., dt.valid)[, -1]
-pred.lasso <- predict(md.lasso ,s = bestlam ,newx = x.valid)
-mean((pred.lasso - dt.valid$PROFIT_LOSS)^2)
+x.valid <- model.matrix(PRED ~., dt.valid[, !c("ACCOUNT_ID"), with = F])[, -1]
+y.valid <- dt.valid$PRED
+pred.lasso <- predict(md.lasso , s = bestlam , newx = x.valid)
+colAUC(pred.lasso, y.valid)
+# 1
+# 0 vs. 1 0.7686733
+# mean((pred.lasso - dt.valid$PROFIT_LOSS)^2)
+coef.lasso <- predict(md.lasso, type = "coefficients", s = bestlam)
+coef.lasso
+coef.lasso[coef.lasso != 0]
 
-
+#####################################################################
+## 2. try 1.1 data on lasso regression ##############################
+#####################################################################
 
