@@ -23,7 +23,7 @@ dt.3 <- dt1.1[, !c("EVENT_ID", "COUNTRY_OF_RESIDENCE_NAME", "MATCH"
                    , "WIN_TEAM", "LOSE_TEAM"), with = F]
 
 dim(dt.3)
-# [1] 174226     41
+# [1] 197202    106
 
 ##############################
 ## 1.1 3 in 1 ################
@@ -63,7 +63,10 @@ Transform3to1 <- function(dt){
                 , THIS_AVG_BET_SIZE = mean(TRANSACTION_COUNT * AVG_BET_SIZE, na.rm = T)
                 , THIS_MAX_BET_SIZE = max(MAX_BET_SIZE, na.rm = T)
                 , THIS_MIN_BET_SIZE = min(MIN_BET_SIZE, na.rm = T)
-                , THIS_STDEV_BET_SIZE = STDEV_BET_SIZE / sqrt(sum(TRANSACTION_COUNT, na.rm = T))
+                , THIS_AVG_STDEV_BET_SIZE = mean(STDEV_BET_SIZE, na.rm = T)
+                , THIS_MAX_STDEV_BET_SIZE = max(STDEV_BET_SIZE, na.rm = T)
+                , THIS_MIN_STDEV_BET_SIZE = min(STDEV_BET_SIZE, na.rm = T)
+                , THIS_STDEV_STDEV_BET_SIZE = sd(STDEV_BET_SIZE, na.rm = T)
                 
                 # THIS TRANSACTION_COUNT INPLAY
                 , THIS_AVG_TRANSACTION_COUNT_INPLAY_Y = mean(TRANSACTION_COUNT_INPLAY_BET_Y, na.rm = T)
@@ -82,8 +85,14 @@ Transform3to1 <- function(dt){
                 , THIS_MAX_BET_SIZE_INPLAY_N = max(MAX_BET_SIZE_INPLAY_BET_N, na.rm = T)
                 , THIS_MIN_BET_SIZE_INPLAY_Y = min(MIN_BET_SIZE_INPLAY_BET_Y, na.rm = T)
                 , THIS_MIN_BET_SIZE_INPLAY_N = min(MIN_BET_SIZE_INPLAY_BET_N, na.rm = T)
-                , THIS_STDEV_BET_SIZE_INPLAY_Y = STDEV_BET_SIZE_INPLAY_BET_Y / sqrt(sum(TRANSACTION_COUNT_INPLAY_BET_Y, na.rm = T))
-                , THIS_STDEV_BET_SIZE_INPLAY_N = STDEV_BET_SIZE_INPLAY_BET_N / sqrt(sum(TRANSACTION_COUNT_INPLAY_BET_N, na.rm = T))
+                , THIS_AVG_STDEV_BET_SIZE_INPLAY_Y = mean(STDEV_BET_SIZE_INPLAY_BET_Y, na.rm = T)
+                , THIS_MIN_STDEV_BET_SIZE_INPLAY_Y = min(STDEV_BET_SIZE_INPLAY_BET_Y, na.rm = T)
+                , THIS_MAX_STDEV_BET_SIZE_INPLAY_Y = max(STDEV_BET_SIZE_INPLAY_BET_Y, na.rm = T)
+                , THIS_STDEV_STDEV_BET_SIZE_INPLAY_Y = sd(STDEV_BET_SIZE_INPLAY_BET_Y, na.rm = T)
+                , THIS_AVG_STDEV_BET_SIZE_INPLAY_N = mean(STDEV_BET_SIZE_INPLAY_BET_N, na.rm = T)
+                , THIS_MIN_STDEV_BET_SIZE_INPLAY_N = min(STDEV_BET_SIZE_INPLAY_BET_N, na.rm = T)
+                , THIS_MAX_STDEV_BET_SIZE_INPLAY_N = max(STDEV_BET_SIZE_INPLAY_BET_N, na.rm = T)
+                , THIS_STDEV_STDEV_BET_SIZE_INPLAY_N = sd(STDEV_BET_SIZE_INPLAY_BET_N, na.rm = T)
                 
                 # THIS NO_OF_BID_TYPE
                 , THIS_NO_OF_BID_TYPE = sum(NO_OF_BID_TYPE, na.rm = T)
@@ -302,10 +311,10 @@ Transform3to1 <- function(dt){
                 , THIS_STDEV_SCORE_DIFF = sd(SCORE_DIFF, na.rm = T)
                 
                 # THIS RESULT_EXPECTED (should be calcualted along, with UNIT only, not ACCOUNT_ID)
-                , THIS_RESULT_EXPECTED = min(ifelse(as.integer(IND_RESULT_EXPECTED) == 1, 0, 1), na.rm = T)
+                , THIS_RESULT_EXPECTED = MyMode(ifelse(as.integer(IND_RESULT_EXPECTED) == 1, 0, 1))
                 
                 # THIS RESULT_SUPRISED (should be calcualted along, with UNIT only, not ACCOUNT_ID)
-                , THIS_RESULT_SUPRISED = min(ifelse(as.integer(IND_RESULT_SUPRISED) == 1, 0, 1), na.rm = T)
+                , THIS_RESULT_SUPRISED = MyMode(ifelse(as.integer(IND_RESULT_SUPRISED) == 1, 0, 1))
             )
         
         dtTempMerge <- merge(dtTempAccountUnit, dtTempUnit, by = "UNIT", all.x = T)
@@ -317,7 +326,7 @@ Transform3to1 <- function(dt){
 # apply on dt.3
 dt.3in1 <- Transform3to1(dt.3)
 dim(dt.3in1)
-# [1] 558941    123
+# [1] 333999    132
 
 # NAs
 # Before
@@ -329,100 +338,110 @@ apply(dt.3in1, 2, function(x) mean(is.na(x)))
 # THIS_MAX_TRANSACTION_COUNT                THIS_MIN_TRANSACTION_COUNT 
 # 0.0000000                                 0.0000000 
 # THIS_STDEV_TRANSACTION_COUNT                         THIS_AVG_BET_SIZE 
-# 0.3068911                                 0.0000000 
+# 0.5135764                                 0.0000000 
 # THIS_MAX_BET_SIZE                         THIS_MIN_BET_SIZE 
 # 0.0000000                                 0.0000000 
-# THIS_STDEV_BET_SIZE       THIS_AVG_TRANSACTION_COUNT_INPLAY_Y 
+# THIS_AVG_STDEV_BET_SIZE                   THIS_MAX_STDEV_BET_SIZE 
 # 0.0000000                                 0.0000000 
-# THIS_AVG_TRANSACTION_COUNT_INPLAY_N       THIS_MAX_TRANSACTION_COUNT_INPLAY_Y 
+# THIS_MIN_STDEV_BET_SIZE                 THIS_STDEV_STDEV_BET_SIZE 
+# 0.0000000                                 0.5135764 
+# THIS_AVG_TRANSACTION_COUNT_INPLAY_Y       THIS_AVG_TRANSACTION_COUNT_INPLAY_N 
 # 0.0000000                                 0.0000000 
-# THIS_MAX_TRANSACTION_COUNT_INPLAY_N       THIS_MIN_TRANSACTION_COUNT_INPLAY_Y 
+# THIS_MAX_TRANSACTION_COUNT_INPLAY_Y       THIS_MAX_TRANSACTION_COUNT_INPLAY_N 
 # 0.0000000                                 0.0000000 
-# TBIS_MIN_TRANSACTION_COUNT_INPLAY_N THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_Y 
-# 0.0000000                                 0.3068911 
-# THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_N                THIS_AVG_BET_SIZE_INPLAY_Y 
-# 0.3068911                                 0.0000000 
-# THIS_AVG_BET_SIZE_INPLAY_N                THIS_MAX_BET_SIZE_INPLAY_Y 
+# THIS_MIN_TRANSACTION_COUNT_INPLAY_Y       TBIS_MIN_TRANSACTION_COUNT_INPLAY_N 
 # 0.0000000                                 0.0000000 
-# THIS_MAX_BET_SIZE_INPLAY_N                THIS_MIN_BET_SIZE_INPLAY_Y 
+# THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_Y THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_N 
+# 0.5135764                                 0.5135764 
+# THIS_AVG_BET_SIZE_INPLAY_Y                THIS_AVG_BET_SIZE_INPLAY_N 
 # 0.0000000                                 0.0000000 
-# THIS_MIN_BET_SIZE_INPLAY_N              THIS_STDEV_BET_SIZE_INPLAY_Y 
-# 0.0000000                                 0.1349141 
-# THIS_STDEV_BET_SIZE_INPLAY_N                       THIS_NO_OF_BID_TYPE 
-# 0.2149064                                 0.0000000 
-# THIS_NO_OF_INPLAY_BET                        THIS_AVG_TIME_DIFF 
+# THIS_MAX_BET_SIZE_INPLAY_Y                THIS_MAX_BET_SIZE_INPLAY_N 
 # 0.0000000                                 0.0000000 
-# THIS_MAX_TIME_DIFF                        THIS_MIN_TIME_DIFF 
+# THIS_MIN_BET_SIZE_INPLAY_Y                THIS_MIN_BET_SIZE_INPLAY_N 
 # 0.0000000                                 0.0000000 
-# THIS_STDEV_TIME_DIFF                                THIS_TOP_1 
-# 0.3068911                                 0.0000000 
-# THIS_TOP_2                                THIS_TOP_5 
+# THIS_AVG_STDEV_BET_SIZE_INPLAY_Y          THIS_MIN_STDEV_BET_SIZE_INPLAY_Y 
 # 0.0000000                                 0.0000000 
-# THIS_TOP_10                               THIS_TOP_15 
+# THIS_MAX_STDEV_BET_SIZE_INPLAY_Y        THIS_STDEV_STDEV_BET_SIZE_INPLAY_Y 
+# 0.0000000                                 0.5135764 
+# THIS_AVG_STDEV_BET_SIZE_INPLAY_N          THIS_MIN_STDEV_BET_SIZE_INPLAY_N 
 # 0.0000000                                 0.0000000 
-# THIS_TOP_20                               THIS_TOP_25 
+# THIS_MAX_STDEV_BET_SIZE_INPLAY_N        THIS_STDEV_STDEV_BET_SIZE_INPLAY_N 
+# 0.0000000                                 0.5135764 
+# THIS_NO_OF_BID_TYPE                     THIS_NO_OF_INPLAY_BET 
 # 0.0000000                                 0.0000000 
-# THIS_BOTTOM_1                             THIS_BOTTOM_2 
+# THIS_AVG_TIME_DIFF                        THIS_MAX_TIME_DIFF 
 # 0.0000000                                 0.0000000 
-# THIS_BOTTOM_5                            THIS_BOTTOM_10 
+# THIS_MIN_TIME_DIFF                      THIS_STDEV_TIME_DIFF 
+# 0.0000000                                 0.5135764 
+# THIS_TOP_1                                THIS_TOP_2 
 # 0.0000000                                 0.0000000 
-# THIS_BOTTOM_15                            THIS_BOTTOM_20 
+# THIS_TOP_5                               THIS_TOP_10 
 # 0.0000000                                 0.0000000 
-# THIS_BOTTOM_25                                THIS_ME2ME 
+# THIS_TOP_15                               THIS_TOP_20 
 # 0.0000000                                 0.0000000 
-# THIS_INPLAY_Y                             THIS_INPLAY_N 
+# THIS_TOP_25                             THIS_BOTTOM_1 
 # 0.0000000                                 0.0000000 
-# THIS_IN_AND_OUT_PLAY                          THIS_IS_FROM_WIN 
+# THIS_BOTTOM_2                             THIS_BOTTOM_5 
 # 0.0000000                                 0.0000000 
-# THIS_IS_FROM_LOSE                      THIS_IS_FROM_NEITHER 
+# THIS_BOTTOM_10                            THIS_BOTTOM_15 
 # 0.0000000                                 0.0000000 
-# RPE_ATTENDED_ABSENT                    PRE_PERC_BEING_A_ME2ME 
+# THIS_BOTTOM_20                            THIS_BOTTOM_25 
 # 0.0000000                                 0.0000000 
-# PRE_PERC_INPLAY_Y                         PRE_PERC_INPLAY_N 
+# THIS_ME2ME                             THIS_INPLAY_Y 
 # 0.0000000                                 0.0000000 
-# PRE_PERC_IN_AND_OUT_PLAY                              PRE_RATE_WIN 
+# THIS_INPLAY_N                      THIS_IN_AND_OUT_PLAY 
 # 0.0000000                                 0.0000000 
-# PRE_WIN_LOSE                       PRE_AVG_PROFIT_LOSS 
+# THIS_IS_FROM_WIN                         THIS_IS_FROM_LOSE 
 # 0.0000000                                 0.0000000 
-# PRE_MAX_PROFIT_LOSS                       PRE_MIN_PROFIT_LOSS 
+# THIS_IS_FROM_NEITHER                       RPE_ATTENDED_ABSENT 
 # 0.0000000                                 0.0000000 
-# PRE_PERC_ATTENDING_EXPECTED_EVENT         PRE_PERC_ATTENDING_SUPRISED_EVENT 
+# PRE_PERC_BEING_A_ME2ME                         PRE_PERC_INPLAY_Y 
 # 0.0000000                                 0.0000000 
-# LAST_PROFIT_LOSS                    LAST_TRANSACTION_COUNT 
+# PRE_PERC_INPLAY_N                  PRE_PERC_IN_AND_OUT_PLAY 
 # 0.0000000                                 0.0000000 
-# LAST_AVG_BET_SIZE                         LAST_MAX_BET_SIZE 
+# PRE_RATE_WIN                              PRE_WIN_LOSE 
 # 0.0000000                                 0.0000000 
-# LAST_MIN_BET_SIZE                       LAST_STDEV_BET_SIZE 
+# PRE_AVG_PROFIT_LOSS                       PRE_MAX_PROFIT_LOSS 
 # 0.0000000                                 0.0000000 
-# LAST_TRANSACTION_COUNT_INPLAY_BET_Y       LAST_TRANSACTION_COUNT_INPLAY_BET_N 
+# PRE_MIN_PROFIT_LOSS         PRE_PERC_ATTENDING_EXPECTED_EVENT 
 # 0.0000000                                 0.0000000 
-# LAST_MAX_BET_SIZE_INPLAY_BET_Y            LAST_MAX_BET_SIZE_INPLAY_BET_N 
+# PRE_PERC_ATTENDING_SUPRISED_EVENT                          LAST_PROFIT_LOSS 
 # 0.0000000                                 0.0000000 
-# LAST_MIN_BET_SIZE_INPLAY_BET_Y            LAST_MIN_BET_SIZE_INPLAY_BET_N 
+# LAST_TRANSACTION_COUNT                         LAST_AVG_BET_SIZE 
 # 0.0000000                                 0.0000000 
-# LAST_STDEV_BET_SIZE_INPLAY_BET_Y          LAST_STDEV_BET_SIZE_INPLAY_BET_N 
+# LAST_MAX_BET_SIZE                         LAST_MIN_BET_SIZE 
 # 0.0000000                                 0.0000000 
-# LAST_NO_OF_BID_TYPE                     LAST_NO_OF_INPLAY_BET 
+# LAST_STDEV_BET_SIZE       LAST_TRANSACTION_COUNT_INPLAY_BET_Y 
 # 0.0000000                                 0.0000000 
-# LAST_TIME_DIFF                                LAST_TOP_1 
+# LAST_TRANSACTION_COUNT_INPLAY_BET_N            LAST_MAX_BET_SIZE_INPLAY_BET_Y 
 # 0.0000000                                 0.0000000 
-# LAST_TOP_2                                LAST_TOP_5 
+# LAST_MAX_BET_SIZE_INPLAY_BET_N            LAST_MIN_BET_SIZE_INPLAY_BET_Y 
 # 0.0000000                                 0.0000000 
-# LAST_TOP_10                               LAST_TOP_15 
+# LAST_MIN_BET_SIZE_INPLAY_BET_N          LAST_STDEV_BET_SIZE_INPLAY_BET_Y 
 # 0.0000000                                 0.0000000 
-# LAST_TOP_20                               LAST_TOP_25 
+# LAST_STDEV_BET_SIZE_INPLAY_BET_N                       LAST_NO_OF_BID_TYPE 
 # 0.0000000                                 0.0000000 
-# LAST_BOTTOM_1                             LAST_BOTTOM_2 
+# LAST_NO_OF_INPLAY_BET                            LAST_TIME_DIFF 
 # 0.0000000                                 0.0000000 
-# LAST_BOTTOM_5                            LAST_BOTTOM_10 
+# LAST_TOP_1                                LAST_TOP_2 
 # 0.0000000                                 0.0000000 
-# LAST_BOTTOM_15                            LAST_BOTTOM_20 
+# LAST_TOP_5                               LAST_TOP_10 
 # 0.0000000                                 0.0000000 
-# LAST_BOTTOM_25                                LAST_ME2ME 
+# LAST_TOP_15                               LAST_TOP_20 
 # 0.0000000                                 0.0000000 
-# LAST_ODDS_1                               LAST_ODDS_2 
+# LAST_TOP_25                             LAST_BOTTOM_1 
 # 0.0000000                                 0.0000000 
-# LAST_IND_INPLAY_Y                         LAST_IND_INPLAY_N 
+# LAST_BOTTOM_2                             LAST_BOTTOM_5 
+# 0.0000000                                 0.0000000 
+# LAST_BOTTOM_10                            LAST_BOTTOM_15 
+# 0.0000000                                 0.0000000 
+# LAST_BOTTOM_20                            LAST_BOTTOM_25 
+# 0.0000000                                 0.0000000 
+# LAST_ME2ME                               LAST_ODDS_1 
+# 0.0000000                                 0.0000000 
+# LAST_ODDS_2                         LAST_IND_INPLAY_Y 
+# 0.0000000                                 0.0000000 
+# LAST_IND_INPLAY_N                   LAST_IND_IN_AND_OUT_PAY 
 # 0.0000000                                 0.0000000 
 # LAST_IND_RESULT_EXPECTED                  LAST_IND_RESULT_SUPRISED 
 # 0.0000000                                 0.0000000 
@@ -445,10 +464,11 @@ apply(dt.3in1, 2, function(x) mean(is.na(x)))
 # THIS_RESULT_EXPECTED                      THIS_RESULT_SUPRISED 
 # 0.0000000                                 0.0000000 
 dt.3in1$THIS_STDEV_TRANSACTION_COUNT[is.na(dt.3in1$THIS_STDEV_TRANSACTION_COUNT)] <- 0
-dt.3in1$THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_N[is.na(dt.3in1$THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_N)] <- 0
+dt.3in1$THIS_STDEV_STDEV_BET_SIZE[is.na(dt.3in1$THIS_STDEV_STDEV_BET_SIZE)] <- 0
 dt.3in1$THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_Y[is.na(dt.3in1$THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_Y)] <- 0
-dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_Y[is.na(dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_Y)] <- 0
-dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_N[is.na(dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_N)] <- 0
+dt.3in1$THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_N[is.na(dt.3in1$THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_N)] <- 0
+dt.3in1$THIS_STDEV_STDEV_BET_SIZE_INPLAY_Y[is.na(dt.3in1$THIS_STDEV_STDEV_BET_SIZE_INPLAY_Y)] <- 0
+dt.3in1$THIS_STDEV_STDEV_BET_SIZE_INPLAY_N[is.na(dt.3in1$THIS_STDEV_STDEV_BET_SIZE_INPLAY_N)] <- 0
 dt.3in1$THIS_STDEV_TIME_DIFF[is.na(dt.3in1$THIS_STDEV_TIME_DIFF)] <- 0
 
 # after
@@ -463,97 +483,107 @@ apply(dt.3in1, 2, function(x) mean(is.na(x)))
 # 0                                         0 
 # THIS_MAX_BET_SIZE                         THIS_MIN_BET_SIZE 
 # 0                                         0 
-# THIS_STDEV_BET_SIZE       THIS_AVG_TRANSACTION_COUNT_INPLAY_Y 
+# THIS_AVG_STDEV_BET_SIZE                   THIS_MAX_STDEV_BET_SIZE 
 # 0                                         0 
-# THIS_AVG_TRANSACTION_COUNT_INPLAY_N       THIS_MAX_TRANSACTION_COUNT_INPLAY_Y 
+# THIS_MIN_STDEV_BET_SIZE                 THIS_STDEV_STDEV_BET_SIZE 
 # 0                                         0 
-# THIS_MAX_TRANSACTION_COUNT_INPLAY_N       THIS_MIN_TRANSACTION_COUNT_INPLAY_Y 
+# THIS_AVG_TRANSACTION_COUNT_INPLAY_Y       THIS_AVG_TRANSACTION_COUNT_INPLAY_N 
 # 0                                         0 
-# TBIS_MIN_TRANSACTION_COUNT_INPLAY_N THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_Y 
+# THIS_MAX_TRANSACTION_COUNT_INPLAY_Y       THIS_MAX_TRANSACTION_COUNT_INPLAY_N 
 # 0                                         0 
-# THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_N                THIS_AVG_BET_SIZE_INPLAY_Y 
+# THIS_MIN_TRANSACTION_COUNT_INPLAY_Y       TBIS_MIN_TRANSACTION_COUNT_INPLAY_N 
 # 0                                         0 
-# THIS_AVG_BET_SIZE_INPLAY_N                THIS_MAX_BET_SIZE_INPLAY_Y 
+# THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_Y THIS_STDEV_TRANSACTION_COUNT_INPLAY_BET_N 
 # 0                                         0 
-# THIS_MAX_BET_SIZE_INPLAY_N                THIS_MIN_BET_SIZE_INPLAY_Y 
+# THIS_AVG_BET_SIZE_INPLAY_Y                THIS_AVG_BET_SIZE_INPLAY_N 
 # 0                                         0 
-# THIS_MIN_BET_SIZE_INPLAY_N              THIS_STDEV_BET_SIZE_INPLAY_Y 
+# THIS_MAX_BET_SIZE_INPLAY_Y                THIS_MAX_BET_SIZE_INPLAY_N 
 # 0                                         0 
-# THIS_STDEV_BET_SIZE_INPLAY_N                       THIS_NO_OF_BID_TYPE 
+# THIS_MIN_BET_SIZE_INPLAY_Y                THIS_MIN_BET_SIZE_INPLAY_N 
 # 0                                         0 
-# THIS_NO_OF_INPLAY_BET                        THIS_AVG_TIME_DIFF 
+# THIS_AVG_STDEV_BET_SIZE_INPLAY_Y          THIS_MIN_STDEV_BET_SIZE_INPLAY_Y 
 # 0                                         0 
-# THIS_MAX_TIME_DIFF                        THIS_MIN_TIME_DIFF 
+# THIS_MAX_STDEV_BET_SIZE_INPLAY_Y        THIS_STDEV_STDEV_BET_SIZE_INPLAY_Y 
 # 0                                         0 
-# THIS_STDEV_TIME_DIFF                                THIS_TOP_1 
+# THIS_AVG_STDEV_BET_SIZE_INPLAY_N          THIS_MIN_STDEV_BET_SIZE_INPLAY_N 
 # 0                                         0 
-# THIS_TOP_2                                THIS_TOP_5 
+# THIS_MAX_STDEV_BET_SIZE_INPLAY_N        THIS_STDEV_STDEV_BET_SIZE_INPLAY_N 
 # 0                                         0 
-# THIS_TOP_10                               THIS_TOP_15 
+# THIS_NO_OF_BID_TYPE                     THIS_NO_OF_INPLAY_BET 
 # 0                                         0 
-# THIS_TOP_20                               THIS_TOP_25 
+# THIS_AVG_TIME_DIFF                        THIS_MAX_TIME_DIFF 
 # 0                                         0 
-# THIS_BOTTOM_1                             THIS_BOTTOM_2 
+# THIS_MIN_TIME_DIFF                      THIS_STDEV_TIME_DIFF 
 # 0                                         0 
-# THIS_BOTTOM_5                            THIS_BOTTOM_10 
+# THIS_TOP_1                                THIS_TOP_2 
 # 0                                         0 
-# THIS_BOTTOM_15                            THIS_BOTTOM_20 
+# THIS_TOP_5                               THIS_TOP_10 
 # 0                                         0 
-# THIS_BOTTOM_25                                THIS_ME2ME 
+# THIS_TOP_15                               THIS_TOP_20 
 # 0                                         0 
-# THIS_INPLAY_Y                             THIS_INPLAY_N 
+# THIS_TOP_25                             THIS_BOTTOM_1 
 # 0                                         0 
-# THIS_IN_AND_OUT_PLAY                          THIS_IS_FROM_WIN 
+# THIS_BOTTOM_2                             THIS_BOTTOM_5 
 # 0                                         0 
-# THIS_IS_FROM_LOSE                      THIS_IS_FROM_NEITHER 
+# THIS_BOTTOM_10                            THIS_BOTTOM_15 
 # 0                                         0 
-# RPE_ATTENDED_ABSENT                    PRE_PERC_BEING_A_ME2ME 
+# THIS_BOTTOM_20                            THIS_BOTTOM_25 
 # 0                                         0 
-# PRE_PERC_INPLAY_Y                         PRE_PERC_INPLAY_N 
+# THIS_ME2ME                             THIS_INPLAY_Y 
 # 0                                         0 
-# PRE_PERC_IN_AND_OUT_PLAY                              PRE_RATE_WIN 
+# THIS_INPLAY_N                      THIS_IN_AND_OUT_PLAY 
 # 0                                         0 
-# PRE_WIN_LOSE                       PRE_AVG_PROFIT_LOSS 
+# THIS_IS_FROM_WIN                         THIS_IS_FROM_LOSE 
 # 0                                         0 
-# PRE_MAX_PROFIT_LOSS                       PRE_MIN_PROFIT_LOSS 
+# THIS_IS_FROM_NEITHER                       RPE_ATTENDED_ABSENT 
 # 0                                         0 
-# PRE_PERC_ATTENDING_EXPECTED_EVENT         PRE_PERC_ATTENDING_SUPRISED_EVENT 
+# PRE_PERC_BEING_A_ME2ME                         PRE_PERC_INPLAY_Y 
 # 0                                         0 
-# LAST_PROFIT_LOSS                    LAST_TRANSACTION_COUNT 
+# PRE_PERC_INPLAY_N                  PRE_PERC_IN_AND_OUT_PLAY 
 # 0                                         0 
-# LAST_AVG_BET_SIZE                         LAST_MAX_BET_SIZE 
+# PRE_RATE_WIN                              PRE_WIN_LOSE 
 # 0                                         0 
-# LAST_MIN_BET_SIZE                       LAST_STDEV_BET_SIZE 
+# PRE_AVG_PROFIT_LOSS                       PRE_MAX_PROFIT_LOSS 
 # 0                                         0 
-# LAST_TRANSACTION_COUNT_INPLAY_BET_Y       LAST_TRANSACTION_COUNT_INPLAY_BET_N 
+# PRE_MIN_PROFIT_LOSS         PRE_PERC_ATTENDING_EXPECTED_EVENT 
 # 0                                         0 
-# LAST_MAX_BET_SIZE_INPLAY_BET_Y            LAST_MAX_BET_SIZE_INPLAY_BET_N 
+# PRE_PERC_ATTENDING_SUPRISED_EVENT                          LAST_PROFIT_LOSS 
 # 0                                         0 
-# LAST_MIN_BET_SIZE_INPLAY_BET_Y            LAST_MIN_BET_SIZE_INPLAY_BET_N 
+# LAST_TRANSACTION_COUNT                         LAST_AVG_BET_SIZE 
 # 0                                         0 
-# LAST_STDEV_BET_SIZE_INPLAY_BET_Y          LAST_STDEV_BET_SIZE_INPLAY_BET_N 
+# LAST_MAX_BET_SIZE                         LAST_MIN_BET_SIZE 
 # 0                                         0 
-# LAST_NO_OF_BID_TYPE                     LAST_NO_OF_INPLAY_BET 
+# LAST_STDEV_BET_SIZE       LAST_TRANSACTION_COUNT_INPLAY_BET_Y 
 # 0                                         0 
-# LAST_TIME_DIFF                                LAST_TOP_1 
+# LAST_TRANSACTION_COUNT_INPLAY_BET_N            LAST_MAX_BET_SIZE_INPLAY_BET_Y 
 # 0                                         0 
-# LAST_TOP_2                                LAST_TOP_5 
+# LAST_MAX_BET_SIZE_INPLAY_BET_N            LAST_MIN_BET_SIZE_INPLAY_BET_Y 
 # 0                                         0 
-# LAST_TOP_10                               LAST_TOP_15 
+# LAST_MIN_BET_SIZE_INPLAY_BET_N          LAST_STDEV_BET_SIZE_INPLAY_BET_Y 
 # 0                                         0 
-# LAST_TOP_20                               LAST_TOP_25 
+# LAST_STDEV_BET_SIZE_INPLAY_BET_N                       LAST_NO_OF_BID_TYPE 
 # 0                                         0 
-# LAST_BOTTOM_1                             LAST_BOTTOM_2 
+# LAST_NO_OF_INPLAY_BET                            LAST_TIME_DIFF 
 # 0                                         0 
-# LAST_BOTTOM_5                            LAST_BOTTOM_10 
+# LAST_TOP_1                                LAST_TOP_2 
 # 0                                         0 
-# LAST_BOTTOM_15                            LAST_BOTTOM_20 
+# LAST_TOP_5                               LAST_TOP_10 
 # 0                                         0 
-# LAST_BOTTOM_25                                LAST_ME2ME 
+# LAST_TOP_15                               LAST_TOP_20 
 # 0                                         0 
-# LAST_ODDS_1                               LAST_ODDS_2 
+# LAST_TOP_25                             LAST_BOTTOM_1 
 # 0                                         0 
-# LAST_IND_INPLAY_Y                         LAST_IND_INPLAY_N 
+# LAST_BOTTOM_2                             LAST_BOTTOM_5 
+# 0                                         0 
+# LAST_BOTTOM_10                            LAST_BOTTOM_15 
+# 0                                         0 
+# LAST_BOTTOM_20                            LAST_BOTTOM_25 
+# 0                                         0 
+# LAST_ME2ME                               LAST_ODDS_1 
+# 0                                         0 
+# LAST_ODDS_2                         LAST_IND_INPLAY_Y 
+# 0                                         0 
+# LAST_IND_INPLAY_N                   LAST_IND_IN_AND_OUT_PAY 
 # 0                                         0 
 # LAST_IND_RESULT_EXPECTED                  LAST_IND_RESULT_SUPRISED 
 # 0                                         0 
@@ -575,7 +605,6 @@ apply(dt.3in1, 2, function(x) mean(is.na(x)))
 # 0                                         0 
 # THIS_RESULT_EXPECTED                      THIS_RESULT_SUPRISED 
 # 0                                         0 
-
 ##############################
 ## 1.6 change class ##########
 ##############################
@@ -638,32 +667,6 @@ str(dt.3in1)
 # $ THIS_MIN_SCORE_DIFF                      : num  -3 -3 -3 -3 -3 -3 -3 -3 -3 -3 ...
 # $ THIS_STDEV_SCORE_DIFF                    : num  36 36 36 36 36 ...
 # $ THIS_RESULT_EXPECTED                     : int  1 1 1 1 1 1 1 1 1 1 ...
-
-dt.3in1[, THIS_TOP_1 := as.factor(THIS_TOP_1)]
-dt.3in1[, THIS_TOP_2 := as.factor(THIS_TOP_2)]
-dt.3in1[, THIS_TOP_5 := as.factor(THIS_TOP_5)]
-dt.3in1[, THIS_TOP_10 := as.factor(THIS_TOP_10)]
-dt.3in1[, THIS_TOP_15 := as.factor(THIS_TOP_15)]
-dt.3in1[, THIS_TOP_20 := as.factor(THIS_TOP_20)]
-dt.3in1[, THIS_TOP_25 := as.factor(THIS_TOP_25)]
-
-dt.3in1[, THIS_BOTTOM_1 := as.factor(THIS_BOTTOM_1)]
-dt.3in1[, THIS_BOTTOM_2 := as.factor(THIS_BOTTOM_2)]
-dt.3in1[, THIS_BOTTOM_5 := as.factor(THIS_BOTTOM_5)]
-dt.3in1[, THIS_BOTTOM_10 := as.factor(THIS_BOTTOM_10)]
-dt.3in1[, THIS_BOTTOM_15 := as.factor(THIS_BOTTOM_15)]
-dt.3in1[, THIS_BOTTOM_20 := as.factor(THIS_BOTTOM_20)]
-dt.3in1[, THIS_BOTTOM_25 := as.factor(THIS_BOTTOM_25)]
-
-dt.3in1$THIS_ME2ME <- as.factor(dt.3in1$THIS_ME2ME)
-dt.3in1[, THIS_INPLAY_Y := as.factor(THIS_INPLAY_Y)]
-dt.3in1[, THIS_INPLAY_N := as.factor(THIS_INPLAY_N)]
-dt.3in1$THIS_IN_AND_OUT_PLAY <- as.factor(dt.3in1$THIS_IN_AND_OUT_PLAY)
-dt.3in1$THIS_IS_FROM_WIN <- as.factor(dt.3in1$THIS_IS_FROM_WIN)
-dt.3in1$THIS_IS_FROM_LOSE <- as.factor(dt.3in1$THIS_IS_FROM_LOSE)
-dt.3in1$THIS_IS_FROM_NEITHER <- as.factor(dt.3in1$THIS_IS_FROM_NEITHER)
-dt.3in1$THIS_RESULT_EXPECTED <- as.factor(dt.3in1$THIS_RESULT_EXPECTED)
-dt.3in1$THIS_RESULT_SUPRISED <- as.factor(dt.3in1$THIS_RESULT_SUPRISED)
 
 dt.3in1[, LAST_TOP_1 := as.factor(LAST_TOP_1)]
 dt.3in1[, LAST_TOP_2 := as.factor(LAST_TOP_2)]
@@ -751,11 +754,6 @@ str(dt.3in1)
 # $ THIS_MIN_SCORE_DIFF                      : num  -3 -3 -3 -3 -3 -3 -3 -3 -3 -3 ...
 # $ THIS_STDEV_SCORE_DIFF                    : num  36 36 36 36 36 ...
 # $ THIS_RESULT_EXPECTED                     : Factor w/ 2 levels "0","1": 2 2 2 2 2 2 2 2 2 2 ...
-
-# inf, -inf
-# before
-sum(is.finite(dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_N))
-dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_N[dt.3in1$THIS_STDEV_BET_SIZE_INPLAY_N %in% c(Inf, -Inf)] <- 0
 
 ##############################
 ## 1.2 add prediction column #

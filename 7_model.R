@@ -142,19 +142,20 @@ coef.lasso[coef.lasso != 0]
 ## 3.1 train, valid, and test transform
 ##############################
 require(xgboost)
-x.train <- model.matrix(PRED ~., dt.train[, !c("ACCOUNT_ID", "THIS_RESULT_EXPECTED", "THIS_RESULT_SUPRISED"), with = F])[, -1]
+require(Ckmeans.1d.dp)
+x.train <- model.matrix(PRED ~., dt.train[, !c("ACCOUNT_ID"), with = F])[, -1]
 y.train <- ifelse(as.integer(dt.train$PRED) == 1, 0, 1)
 dmx.train <- xgb.DMatrix(data =  x.train, label = y.train)
 
-x.valid1 <- model.matrix(PRED ~., dt.valid1[, !c("ACCOUNT_ID", "THIS_RESULT_EXPECTED", "THIS_RESULT_SUPRISED"), with = F])[, -1]
+x.valid1 <- model.matrix(PRED ~., dt.valid1[, !c("ACCOUNT_ID"), with = F])[, -1]
 y.valid1 <- ifelse(as.integer(dt.valid1$PRED) == 1, 0, 1)
 dmx.valid1 <- xgb.DMatrix(data =  x.valid1, label = y.valid1)
 
-x.valid2 <- model.matrix(PRED ~., dt.valid2[, !c("ACCOUNT_ID", "THIS_RESULT_EXPECTED", "THIS_RESULT_SUPRISED"), with = F])[, -1]
+x.valid2 <- model.matrix(PRED ~., dt.valid2[, !c("ACCOUNT_ID"), with = F])[, -1]
 y.valid2 <- ifelse(as.integer(dt.valid2$PRED) == 1, 0, 1)
 dmx.valid2 <- xgb.DMatrix(data =  x.valid2, label = y.valid2)
 
-x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID", "THIS_RESULT_EXPECTED", "THIS_RESULT_SUPRISED"), with = F])[, -1]
+x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID"), with = F])[, -1]
 
 ##############################
 ## 3.2 model - xgboost
@@ -164,52 +165,190 @@ trainControlxgbTree <- trainControl(method = "boot",number = 4,repeats = 1,#summ
                                     preProcOptions = list(thresh = 0.999,ICAcomp = 111)
 )
 
-md.xgboost <- xgb.train(data = dmx.train
+set.seed(1)
+md.xgboost1 <- xgb.train(data = dmx.train
                       , params = list(nthread = 8
                                       , eval_metric = "auc"
                                       , eta = .05
+                                      , max_depth = 6
                                       , subsample = .8
                                       , colsample_bytree = .3)
                       , watchlist = list(eval1 = dmx.valid1
                                          , eval2 = dmx.valid2
                                          , train = dmx.train)
-                      , nrounds = 150
+                      , nrounds = 1700
                       , verbose = T)
 
-pred.valid1 <- predict(md.xgboost, x.valid1)
-colAUC(pred.valid1, y.valid1)
-# [,1]
-# 0 vs. 1 0.6911533
-# 
-# md.xgboost <- train(x = x.train,
-#                     y = y.train,
-#                     method = "xgbTree",
-#                     tuneGrid = expand.grid(nrounds = 10*(1:15),
-#                                            eta = 0.05,
-#                                            max_depth = 2),
-#                     trControl = trainControlxgbTree,
-#                     watchlist = list(val = dmx.valid1 ,train = dmx.train),
-#                     eval_metric = "auc",
-#                     min_child_weight = 10,
-#                     #early.stop.round = 40,
-#                     #printEveryN = 20,
-#                     subsample = 0.6,
-#                     verbose = 0,
-#                     colsample_bytree =0.8,
-#                     base_score = 0.5,
-#                     nthread =8#,
-#                     #preProcess = c("center","scale")
-#                     #                        ,tuneLength = 100
-# )
+set.seed(2)
+md.xgboost2 <- xgb.train(data = dmx.train
+                         , params = list(nthread = 8
+                                         , eval_metric = "auc"
+                                         , eta = .05
+                                         , subsample = .8
+                                         , colsample_bytree = .3)
+                         , watchlist = list(eval1 = dmx.valid1
+                                            , eval2 = dmx.valid2
+                                            , train = dmx.train)
+                         , nrounds = 1700
+                         , verbose = T)
 
-pred.test <- predict(md.xgboost, newdata = x.test)
+set.seed(3)
+md.xgboost3 <- xgb.train(data = dmx.train
+                         , params = list(nthread = 8
+                                         , eval_metric = "auc"
+                                         , eta = .05
+                                         , subsample = .8
+                                         , colsample_bytree = .3)
+                         , watchlist = list(eval1 = dmx.valid1
+                                            , eval2 = dmx.valid2
+                                            , train = dmx.train)
+                         , nrounds = 1700
+                         , verbose = T)
+
+set.seed(4)
+md.xgboost4 <- xgb.train(data = dmx.train
+                         , params = list(nthread = 8
+                                         , eval_metric = "auc"
+                                         , eta = .05
+                                         , subsample = .8
+                                         , colsample_bytree = .3)
+                         , watchlist = list(eval1 = dmx.valid1
+                                            , eval2 = dmx.valid2
+                                            , train = dmx.train)
+                         , nrounds = 1700
+                         , verbose = T)
+
+set.seed(5)
+md.xgboost5 <- xgb.train(data = dmx.train
+                         , params = list(nthread = 8
+                                         , eval_metric = "auc"
+                                         , eta = .05
+                                         , subsample = .8
+                                         , colsample_bytree = .3)
+                         , watchlist = list(eval1 = dmx.valid1
+                                            , eval2 = dmx.valid2
+                                            , train = dmx.train)
+                         , nrounds = 1700
+                         , verbose = T)
+
+set.seed(6)
+md.xgboost6 <- xgb.train(data = dmx.train
+                         , params = list(nthread = 8
+                                         , eval_metric = "auc"
+                                         , eta = .05
+                                         , subsample = .8
+                                         , colsample_bytree = .3)
+                         , watchlist = list(eval1 = dmx.valid1
+                                            , eval2 = dmx.valid2
+                                            , train = dmx.train)
+                         , nrounds = 1700
+                         , verbose = T)
+
+set.seed(7)
+md.xgboost7 <- xgb.train(data = dmx.train
+                         , params = list(nthread = 8
+                                         , eval_metric = "auc"
+                                         , eta = .05
+                                         , subsample = .8
+                                         , colsample_bytree = .3)
+                         , watchlist = list(eval1 = dmx.valid1
+                                            , eval2 = dmx.valid2
+                                            , train = dmx.train)
+                         , nrounds = 1700
+                         , verbose = T)
+
+# valid1
+pred.valid1.1 <- predict(md.xgboost1, x.valid1)
+pred.valid1.2 <- predict(md.xgboost2, x.valid1)
+pred.valid1.3 <- predict(md.xgboost3, x.valid1)
+pred.valid1.4 <- predict(md.xgboost4, x.valid1)
+pred.valid1.5 <- predict(md.xgboost5, x.valid1)
+pred.valid1.6 <- predict(md.xgboost6, x.valid1)
+pred.valid1.7 <- predict(md.xgboost7, x.valid1)
+
+colAUC(pred.valid1.1, y.valid1)
+# [,1]
+# 0 vs. 1 0.8834542
+colAUC(pred.valid1.2, y.valid1)
+# [,1]
+# 0 vs. 1 0.8841164
+colAUC(pred.valid1.3, y.valid1)
+# [,1]
+# 0 vs. 1 0.8838919
+colAUC(pred.valid1.4, y.valid1)
+# [,1]
+# 0 vs. 1 0.8816272
+colAUC(pred.valid1.5, y.valid1)
+# [,1]
+# 0 vs. 1 0.8829494
+colAUC(pred.valid1.6, y.valid1)
+# [,1]
+# 0 vs. 1 0.8838063
+colAUC(pred.valid1.7, y.valid1)
+# [,1]
+# 0 vs. 1 0.8833958
+
+importance_matrix1 <- xgb.importance(colnames(x.train), model = md.xgboost1)
+print(importance_matrix1)
+xgb.plot.importance(importance_matrix1)
+
+pred.valid1 <- pred.valid1.1 + pred.valid1.2 + pred.valid1.3 + pred.valid1.4
+                   + pred.valid1.5 + pred.valid1.6 + pred.valid1.7
+colAUC(pred.valid1, y.valid1)
+
+# valid2
+pred.valid2.1 <- predict(md.xgboost1, x.valid2)
+pred.valid2.2 <- predict(md.xgboost2, x.valid2)
+pred.valid2.3 <- predict(md.xgboost3, x.valid2)
+pred.valid2.4 <- predict(md.xgboost4, x.valid2)
+pred.valid2.5 <- predict(md.xgboost5, x.valid2)
+pred.valid2.6 <- predict(md.xgboost6, x.valid2)
+pred.valid2.7 <- predict(md.xgboost7, x.valid2)
+
+colAUC(pred.valid2.1, y.valid2)
+# [,1]
+# 0 vs. 1 0.7797133
+colAUC(pred.valid2.2, y.valid2)
+# [,1]
+# 0 vs. 1 0.7853802
+colAUC(pred.valid2.3, y.valid2)
+# [,1]
+# 0 vs. 1 0.7793123
+colAUC(pred.valid2.4, y.valid2)
+# [,1]
+# 0 vs. 1 0.7816157
+colAUC(pred.valid2.5, y.valid2)
+# [,1]
+# 0 vs. 1 0.7846166
+colAUC(pred.valid2.6, y.valid2)
+# [,1]
+# 0 vs. 1 0.7792754
+colAUC(pred.valid2.7, y.valid2)
+# [,1]
+# 0 vs. 1 0.782432
+
+pred.valid2 <- pred.valid2.1 + pred.valid2.2 + pred.valid2.3 + pred.valid2.4
+                   + pred.valid2.5 + pred.valid2.6 + pred.valid2.7
+colAUC(pred.valid2, y.valid2)
+
+##############################
+## 3.3 submit
+##############################
+pred.test1 <- predict(md.xgboost1, x.test)
+pred.test2 <- predict(md.xgboost2, x.test)
+pred.test3 <- predict(md.xgboost3, x.test)
+pred.test4 <- predict(md.xgboost4, x.test)
+pred.test5 <- predict(md.xgboost5, x.test)
+pred.test6 <- predict(md.xgboost6, x.test)
+pred.test7 <- predict(md.xgboost7, x.test)
+
+pred.test <- pred.test1 + pred.test2 + pred.test3 + pred.test4
+                 + pred.test5 + pred.test6 + pred.test7
+
 table(pred.test)
-# pred.test
-# 0     1 
-# 10455  2480 
 dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
-write.csv(dt.submit, "submit/7_261115_2054_xgboost_with_3in1_valid1_valid2.csv", row.names = F) # 0.56465
+write.csv(dt.submit, "submit/7_281115_1041_7_xgboost_with_3in1_valid1_valid2_.csv", row.names = F) # 0.56465
 
 
 
