@@ -6,7 +6,8 @@ rm(list = ls()); gc()
 require(data.table)
 require(dplyr)
 require(caret)
-load("../Datathon_Full_Dataset/transformedData.RData")
+# load("../Datathon_Full_Dataset/transformedData.RData")
+load("../Datathon_Full_Dataset/transformed_non_overlap_Data.RData")
 #######################################
 ## 1.0 centre and scale ###############
 #######################################
@@ -22,7 +23,7 @@ dim(dt.centreScale)
 ###########
 ## 2.1 zero and near zero variance
 ###########
-nzv <- nearZeroVar(dt.centreScale, saveMetrics= TRUE)
+nzv <- nearZeroVar(dt.centreScale, saveMetrics = TRUE)
 nzv[nzv$nzv, ]
 #                                   freqRatio percentUnique  zeroVarnzv
 # THIS_MAX_BET_SIZE_INPLAY_N        57.28617  8.1027188704   FALSE TRUE
@@ -117,7 +118,7 @@ dim(dt.centreScale)
 ## train ##
 ###########
 dt.train <- dt.centreScale[!UNIT %in% c("38_39_40" # valid set 1 related
-                                        , "12_13_14" # valid set 2 related
+                                        , "20_21_22" # valid set 2 related
                                         , "42_43_44", "43_44_45", "44_45_46") # test set related
                          , with = T]
 dt.train[, UNIT := NULL]
@@ -141,7 +142,7 @@ dim(dt.valid1)
 ############
 ## valid2 ##
 ############
-dt.valid2 <- dt.centreScale[UNIT == c("12_13_14"), with = T]
+dt.valid2 <- dt.centreScale[UNIT == c("20_21_22"), with = T]
 dt.valid2[, UNIT := NULL]
 # dt.valid[, ACCOUNT_ID := NULL]
 dt.valid2[, THIS_PROFIT_LOSS := NULL]

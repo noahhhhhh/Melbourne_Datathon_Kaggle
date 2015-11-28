@@ -358,29 +358,75 @@ dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort
 # [1] 7374    2
 write.csv(dt.submit, "submit/8_281115_1914_7_xgboost_with_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.62256
 
+#####################################################################
+## 4. try 3in1 non-overlap data on automated xgboost ################
+#####################################################################
+##############################
+## 4.1 train, valid, and test transform
+##############################
+require(xgboost)
+require(Ckmeans.1d.dp)
+x.train <- model.matrix(PRED ~., dt.train[, !c("ACCOUNT_ID"), with = F])[, -1]
+y.train <- ifelse(as.integer(dt.train$PRED) == 1, 0, 1)
+dmx.train <- xgb.DMatrix(data =  x.train, label = y.train)
 
+x.valid1 <- model.matrix(PRED ~., dt.valid1[, !c("ACCOUNT_ID"), with = F])[, -1]
+y.valid1 <- ifelse(as.integer(dt.valid1$PRED) == 1, 0, 1)
+dmx.valid1 <- xgb.DMatrix(data =  x.valid1, label = y.valid1)
 
+x.valid2 <- model.matrix(PRED ~., dt.valid2[, !c("ACCOUNT_ID"), with = F])[, -1]
+y.valid2 <- ifelse(as.integer(dt.valid2$PRED) == 1, 0, 1)
+dmx.valid2 <- xgb.DMatrix(data =  x.valid2, label = y.valid2)
 
+x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID"), with = F])[, -1]
 
+##############################
+## 4.2 model - xgboost
+##############################
+eta <- c(.01, .015, .02, .025, .03)
+max_depth <- c(8, 7, 7, 6, 5)
+min.child <- c(5, 5, 5, 5, 5)
+subsample <- c(.8, .85, .90, .95, .1)
+colsample_bytree <- c(.3, .35, .4, .45, .5)
+nrounds <- c(2000, 1800, 1600, 1400, 1200)
 
+models <- 5
+reps <- 10
 
+pred.test <- rep(0, nrow(dtSampleSubmit))
+for (i in 1:reps){
+    print(paste("rep", i, "- Start"))
+    for(j in 1:models){
+        print(paste("------model", j, ": Start"))
+        set.seed(1000 * i + 100 * j)
+        md.xgboost <- xgb.train(data = dmx.train
+                                 , params = list(nthread = 8
+                                                 , eval_metric = "auc"
+                                                 , eta = eta[j]
+                                                 , max_depth = max_depth[j]
+                                                 , subsample = subsample[j]
+                                                 , colsample_bytree = colsample_bytree[j])
+                                 , watchlist = list(eval1 = dmx.valid1
+                                                    , eval2 = dmx.valid2
+                                                    , train = dmx.train)
+                                 , nrounds = nrounds[j]
+                                 , verbose = T)
+        pred.test <- pred.test + predict(md.xgboost, x.test)
+        print(paste("------model", j, ": End"))
+    }
+    print(paste("rep", i, "- End"))
+}
+pred.test
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+##############################
+## 4.3 submit
+##############################
+dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
+dim(dt.submit)
+# [1] 12935     2
+dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
+# [1] 7374    2
+write.csv(dt.submit, "submit/9_291115_0944_50_xgboost_with_non_overlap_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.61628
 
 
 
