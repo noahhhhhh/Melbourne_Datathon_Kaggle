@@ -7,8 +7,10 @@ require(data.table)
 require(dplyr)
 require(caret)
 require(caTools)
-load("../Datathon_Full_Dataset/transformedData.RData")
-load("../Datathon_Full_Dataset/engineeredData.RData")
+load("../Datathon_Full_Dataset/trainData.RData")
+load("../Datathon_Full_Dataset/valid1Data.RData")
+load("../Datathon_Full_Dataset/valid2Data.RData")
+load("../Datathon_Full_Dataset/testData.RData")
 # dtTestFeatures <- fread("../data_files/semi_and_final_features.csv")
 dtSampleSubmit <- fread("../data_files/sample_submission_bet_size.csv")
 dtSampleSubmit[, Prediction := NULL]
@@ -160,7 +162,7 @@ x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID"), with = F])[, -1]
 ##############################
 ## 3.2 model - xgboost
 ##############################
-trainControlxgbTree <- trainControl(method = "boot",number = 4,repeats = 1,#summaryFunction = twoClassSummary,
+trainControlxgbTree <- trainControl(method = "boot",number = 4, repeats = 1, #summaryFunction = twoClassSummary,
                                     verboseIter = TRUE,
                                     preProcOptions = list(thresh = 0.999,ICAcomp = 111)
 )
@@ -169,7 +171,7 @@ set.seed(1)
 md.xgboost1 <- xgb.train(data = dmx.train
                       , params = list(nthread = 8
                                       , eval_metric = "auc"
-                                      , eta = .05
+                                      , eta = .025
                                       , max_depth = 6
                                       , subsample = .8
                                       , colsample_bytree = .3)
@@ -183,7 +185,7 @@ set.seed(2)
 md.xgboost2 <- xgb.train(data = dmx.train
                          , params = list(nthread = 8
                                          , eval_metric = "auc"
-                                         , eta = .05
+                                         , eta = .025
                                          , subsample = .8
                                          , colsample_bytree = .3)
                          , watchlist = list(eval1 = dmx.valid1
@@ -196,7 +198,7 @@ set.seed(3)
 md.xgboost3 <- xgb.train(data = dmx.train
                          , params = list(nthread = 8
                                          , eval_metric = "auc"
-                                         , eta = .05
+                                         , eta = .025
                                          , subsample = .8
                                          , colsample_bytree = .3)
                          , watchlist = list(eval1 = dmx.valid1
@@ -209,7 +211,7 @@ set.seed(4)
 md.xgboost4 <- xgb.train(data = dmx.train
                          , params = list(nthread = 8
                                          , eval_metric = "auc"
-                                         , eta = .05
+                                         , eta = .025
                                          , subsample = .8
                                          , colsample_bytree = .3)
                          , watchlist = list(eval1 = dmx.valid1
@@ -222,7 +224,7 @@ set.seed(5)
 md.xgboost5 <- xgb.train(data = dmx.train
                          , params = list(nthread = 8
                                          , eval_metric = "auc"
-                                         , eta = .05
+                                         , eta = .025
                                          , subsample = .8
                                          , colsample_bytree = .3)
                          , watchlist = list(eval1 = dmx.valid1
@@ -235,7 +237,7 @@ set.seed(6)
 md.xgboost6 <- xgb.train(data = dmx.train
                          , params = list(nthread = 8
                                          , eval_metric = "auc"
-                                         , eta = .05
+                                         , eta = .025
                                          , subsample = .8
                                          , colsample_bytree = .3)
                          , watchlist = list(eval1 = dmx.valid1
@@ -248,7 +250,7 @@ set.seed(7)
 md.xgboost7 <- xgb.train(data = dmx.train
                          , params = list(nthread = 8
                                          , eval_metric = "auc"
-                                         , eta = .05
+                                         , eta = .025
                                          , subsample = .8
                                          , colsample_bytree = .3)
                          , watchlist = list(eval1 = dmx.valid1
@@ -268,25 +270,25 @@ pred.valid1.7 <- predict(md.xgboost7, x.valid1)
 
 colAUC(pred.valid1.1, y.valid1)
 # [,1]
-# 0 vs. 1 0.8834542
+# 0 vs. 1 0.851747
 colAUC(pred.valid1.2, y.valid1)
 # [,1]
-# 0 vs. 1 0.8841164
+# 0 vs. 1 0.8510586
 colAUC(pred.valid1.3, y.valid1)
 # [,1]
-# 0 vs. 1 0.8838919
+# 0 vs. 1 0.851204
 colAUC(pred.valid1.4, y.valid1)
 # [,1]
-# 0 vs. 1 0.8816272
+# 0 vs. 1 0.851204
 colAUC(pred.valid1.5, y.valid1)
 # [,1]
-# 0 vs. 1 0.8829494
+# 0 vs. 1 0.8477428
 colAUC(pred.valid1.6, y.valid1)
 # [,1]
-# 0 vs. 1 0.8838063
+# 0 vs. 1 0.8491994
 colAUC(pred.valid1.7, y.valid1)
 # [,1]
-# 0 vs. 1 0.8833958
+# 0 vs. 1 0.8499412
 
 importance_matrix1 <- xgb.importance(colnames(x.train), model = md.xgboost1)
 print(importance_matrix1)
@@ -295,6 +297,8 @@ xgb.plot.importance(importance_matrix1)
 pred.valid1 <- pred.valid1.1 + pred.valid1.2 + pred.valid1.3 + pred.valid1.4
                    + pred.valid1.5 + pred.valid1.6 + pred.valid1.7
 colAUC(pred.valid1, y.valid1)
+# [,1]
+# 0 vs. 1 0.8520213
 
 # valid2
 pred.valid2.1 <- predict(md.xgboost1, x.valid2)
@@ -307,30 +311,31 @@ pred.valid2.7 <- predict(md.xgboost7, x.valid2)
 
 colAUC(pred.valid2.1, y.valid2)
 # [,1]
-# 0 vs. 1 0.7797133
+# 0 vs. 1 0.7292966
 colAUC(pred.valid2.2, y.valid2)
 # [,1]
-# 0 vs. 1 0.7853802
+# 0 vs. 1 0.7313229
 colAUC(pred.valid2.3, y.valid2)
 # [,1]
-# 0 vs. 1 0.7793123
+# 0 vs. 1 0.7305871
 colAUC(pred.valid2.4, y.valid2)
 # [,1]
-# 0 vs. 1 0.7816157
+# 0 vs. 1 0.7323578
 colAUC(pred.valid2.5, y.valid2)
 # [,1]
-# 0 vs. 1 0.7846166
+# 0 vs. 1 0.7304927
 colAUC(pred.valid2.6, y.valid2)
 # [,1]
-# 0 vs. 1 0.7792754
+# 0 vs. 1 0.7307749
 colAUC(pred.valid2.7, y.valid2)
 # [,1]
-# 0 vs. 1 0.782432
+# 0 vs. 1 0.7333653
 
 pred.valid2 <- pred.valid2.1 + pred.valid2.2 + pred.valid2.3 + pred.valid2.4
                    + pred.valid2.5 + pred.valid2.6 + pred.valid2.7
 colAUC(pred.valid2, y.valid2)
-
+# [,1]
+# 0 vs. 1 0.7341297
 ##############################
 ## 3.3 submit
 ##############################
@@ -347,8 +352,11 @@ pred.test <- pred.test1 + pred.test2 + pred.test3 + pred.test4
 
 table(pred.test)
 dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
+dim(dt.submit)
+# [1] 12935     2
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
-write.csv(dt.submit, "submit/7_281115_1041_7_xgboost_with_3in1_valid1_valid2_.csv", row.names = F) # 0.61456
+# [1] 7374    2
+write.csv(dt.submit, "submit/8_281115_1914_7_xgboost_with_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.62256
 
 
 

@@ -125,7 +125,7 @@ dt.train[, UNIT := NULL]
 dt.train[, THIS_PROFIT_LOSS := NULL]
 str(dt.train)
 dim(dt.train)
-# [1] 283477    131
+# [1] 283477     75
 
 ############
 ## valid1 ##
@@ -136,7 +136,7 @@ dt.valid1[, UNIT := NULL]
 dt.valid1[, THIS_PROFIT_LOSS := NULL]
 str(dt.valid1)
 dim(dt.valid1)
-# [1] 6791  131
+# [1] 6791   75
 
 ############
 ## valid2 ##
@@ -147,7 +147,8 @@ dt.valid2[, UNIT := NULL]
 dt.valid2[, THIS_PROFIT_LOSS := NULL]
 str(dt.valid2)
 dim(dt.valid2)
-# [1] 7780  131
+# [1] 7780   75
+# str(dt.valid2)
 
 ##########
 ## test ##
@@ -159,8 +160,15 @@ dt.test[, THIS_PROFIT_LOSS := NULL]
 dt.test[, PRED := NULL]
 str(dt.test)
 dim(dt.test)
-# [1] 12935   130
+# [1] 12935    74
 
+#######################################
+## 3,0 save ###########################
+#######################################
+save(dt.train, file = "../Datathon_Full_Dataset/trainData.RData")
+save(dt.valid1, file = "../Datathon_Full_Dataset/valid1Data.RData")
+save(dt.valid2, file = "../Datathon_Full_Dataset/valid2Data.RData")
+save(dt.test, file = "../Datathon_Full_Dataset/testData.RData")
 
 
 
