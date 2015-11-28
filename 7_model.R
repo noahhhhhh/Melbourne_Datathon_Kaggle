@@ -348,7 +348,7 @@ pred.test <- pred.test1 + pred.test2 + pred.test3 + pred.test4
 table(pred.test)
 dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
-write.csv(dt.submit, "submit/7_281115_1041_7_xgboost_with_3in1_valid1_valid2_.csv", row.names = F) # 0.56465
+write.csv(dt.submit, "submit/7_281115_1041_7_xgboost_with_3in1_valid1_valid2_.csv", row.names = F) # 0.61456
 
 
 
