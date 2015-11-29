@@ -7,7 +7,8 @@ require(data.table)
 require(dplyr)
 require(caret)
 # load("../Datathon_Full_Dataset/transformedData.RData")
-load("../Datathon_Full_Dataset/transformed_non_overlap_Data.RData")
+# load("../Datathon_Full_Dataset/transformed_non_overlap_Data.RData")
+load("../Datathon_Full_Dataset/transformed_union_Data.RData")
 #######################################
 ## 1.0 centre and scale ###############
 #######################################

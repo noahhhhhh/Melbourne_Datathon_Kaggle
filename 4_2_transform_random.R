@@ -330,7 +330,7 @@ Transform3to1 <- function(dt){
 # apply on dt.3
 dt.3in1 <- Transform3to1(dt.3)
 dim(dt.3in1)
-# [1] 333999    132
+# [1] 779199    132
 
 # NAs
 # Before
@@ -768,4 +768,28 @@ dt.3in1$PRED <- as.factor(dt.3in1$PRED)
 ##############################
 ## 1.3 save it ###############
 ##############################
-save(dt.3in1, file = "../Datathon_Full_Dataset/transformed_non_overlap_Data.RData")
+save(dt.3in1, file = "../Datathon_Full_Dataset/transformed_random_Data.RData")
+dt.3in1.random <- dt.3in1
+dim(dt.3in1.random)
+# [1] 779199    133
+##############################
+## 1.4 load original 3in1 ####
+##############################
+load("../Datathon_Full_Dataset/transformedData.RData")
+dim(dt.3in1)
+# [1] 333999    133
+##############################
+## 1.5 union original and random 3in1
+##############################
+dt.3in1 <- rbind(dt.3in1, dt.3in1.random)
+dim(dt.3in1)
+# [1] 1113198     133
+save(dt.3in1, file = "../Datathon_Full_Dataset/transformed_union_Data.RData")
+
+
+
+
+
+
+
+

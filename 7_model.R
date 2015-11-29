@@ -162,11 +162,6 @@ x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID"), with = F])[, -1]
 ##############################
 ## 3.2 model - xgboost
 ##############################
-trainControlxgbTree <- trainControl(method = "boot",number = 4, repeats = 1, #summaryFunction = twoClassSummary,
-                                    verboseIter = TRUE,
-                                    preProcOptions = list(thresh = 0.999,ICAcomp = 111)
-)
-
 set.seed(1)
 md.xgboost1 <- xgb.train(data = dmx.train
                       , params = list(nthread = 8
@@ -271,24 +266,36 @@ pred.valid1.7 <- predict(md.xgboost7, x.valid1)
 colAUC(pred.valid1.1, y.valid1)
 # [,1]
 # 0 vs. 1 0.851747
+# [,1]
+# 0 vs. 1 0.8590526
 colAUC(pred.valid1.2, y.valid1)
 # [,1]
 # 0 vs. 1 0.8510586
+# [,1]
+# 0 vs. 1 0.8570585
 colAUC(pred.valid1.3, y.valid1)
 # [,1]
 # 0 vs. 1 0.851204
+# [,1]
+# 0 vs. 1 0.8593713
 colAUC(pred.valid1.4, y.valid1)
 # [,1]
 # 0 vs. 1 0.851204
 colAUC(pred.valid1.5, y.valid1)
 # [,1]
 # 0 vs. 1 0.8477428
+# [,1]
+# 0 vs. 1 0.8597132
 colAUC(pred.valid1.6, y.valid1)
 # [,1]
 # 0 vs. 1 0.8491994
+# [,1]
+# 0 vs. 1 0.8588805
 colAUC(pred.valid1.7, y.valid1)
 # [,1]
 # 0 vs. 1 0.8499412
+# [,1]
+# 0 vs. 1 0.8585816
 
 importance_matrix1 <- xgb.importance(colnames(x.train), model = md.xgboost1)
 print(importance_matrix1)
@@ -299,6 +306,8 @@ pred.valid1 <- pred.valid1.1 + pred.valid1.2 + pred.valid1.3 + pred.valid1.4
 colAUC(pred.valid1, y.valid1)
 # [,1]
 # 0 vs. 1 0.8520213
+# [,1]
+# 0 vs. 1 0.8596633
 
 # valid2
 pred.valid2.1 <- predict(md.xgboost1, x.valid2)
@@ -312,30 +321,46 @@ pred.valid2.7 <- predict(md.xgboost7, x.valid2)
 colAUC(pred.valid2.1, y.valid2)
 # [,1]
 # 0 vs. 1 0.7292966
+# [,1]
+# 0 vs. 1 0.7369436
 colAUC(pred.valid2.2, y.valid2)
 # [,1]
 # 0 vs. 1 0.7313229
+# [,1]
+# 0 vs. 1 0.735727
 colAUC(pred.valid2.3, y.valid2)
 # [,1]
 # 0 vs. 1 0.7305871
+# [,1]
+# 0 vs. 1 0.7358102
 colAUC(pred.valid2.4, y.valid2)
 # [,1]
 # 0 vs. 1 0.7323578
+# [,1]
+# 0 vs. 1 0.7357924
 colAUC(pred.valid2.5, y.valid2)
 # [,1]
 # 0 vs. 1 0.7304927
+# [,1]
+# 0 vs. 1 0.7353548
 colAUC(pred.valid2.6, y.valid2)
 # [,1]
 # 0 vs. 1 0.7307749
+# [,1]
+# 0 vs. 1 0.7350671
 colAUC(pred.valid2.7, y.valid2)
 # [,1]
 # 0 vs. 1 0.7333653
+# [,1]
+# 0 vs. 1 0.7356207
 
 pred.valid2 <- pred.valid2.1 + pred.valid2.2 + pred.valid2.3 + pred.valid2.4
                    + pred.valid2.5 + pred.valid2.6 + pred.valid2.7
 colAUC(pred.valid2, y.valid2)
 # [,1]
 # 0 vs. 1 0.7341297
+# [,1]
+# 0 vs. 1 0.7366729
 ##############################
 ## 3.3 submit
 ##############################
@@ -356,7 +381,7 @@ dim(dt.submit)
 # [1] 12935     2
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
 # [1] 7374    2
-write.csv(dt.submit, "submit/8_281115_1914_7_xgboost_with_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.62256
+write.csv(dt.submit, "submit/10_291115_2231_7_xgboost_with_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.62915
 
 #####################################################################
 ## 4. try 3in1 non-overlap data on automated xgboost ################
