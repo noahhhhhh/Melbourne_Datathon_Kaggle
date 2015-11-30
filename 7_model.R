@@ -598,5 +598,52 @@ dim(dt.submit)
 # [1] 12935     2
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
 # [1] 7374    2
-write.csv(dt.submit, "submit/9_291115_0944_50_xgboost_with_non_overlap_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.61628
+write.csv(dt.submit, "submit/14_011215_0718_7_xgboost_binary_logits_with_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.63186
+
+##############################
+## 6.4 ensemble with linear boost
+##############################
+set.seed(1)
+md.xgboost1.gblinear <- xgb.train(data = dmx.train
+                                  , booster = "gblinear"
+                                  , objective = "binary:logistic"
+                                  , params = list(nthread = 8
+                                                  , eval_metric = "auc"
+                                                  , eta = .025
+                                                  , max_depth = 6
+                                                  , subsample = .8
+                                                  , colsample_bytree = .3)
+                                  , watchlist = list(eval1 = dmx.valid1
+                                                     , eval2 = dmx.valid2
+                                                     , train = dmx.train)
+                                  , nrounds = 1700
+                                  , verbose = T)
+
+# valid1
+pred.valid1.1 <- predict(md.xgboost1.gblinear, x.valid1)
+
+colAUC(pred.valid1.1, y.valid1)
+# [,1]
+# 0 vs. 1 0.7274866
+importance_matrix1 <- xgb.importance(colnames(x.train), model = md.xgboost1.gblinear)
+print(importance_matrix1)
+xgb.plot.importance(importance_matrix1)
+
+# valid2
+pred.valid2.1 <- predict(md.xgboost1.gblinear, x.valid2)
+
+colAUC(pred.valid2.1, y.valid2)
+# [,1]z
+# 0 vs. 1 0.6308655
+
+pred.test.linear <- predict(md.xgboost1.gblinear, x.test)
+pred.test.ensemble <- pred.test.linear * 7 + pred.test
+
+dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test.ensemble)
+dim(dt.submit)
+# [1] 12935     2
+dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
+# [1] 7374    2
+write.csv(dt.submit, "submit/15_011215_0818_7_tree_xgboost_binary_logits_and_1_linear_xgboost_binary_logits_with_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.61628
+
 
