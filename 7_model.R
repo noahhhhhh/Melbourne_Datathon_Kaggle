@@ -647,7 +647,7 @@ dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort
 write.csv(dt.submit, "submit/15_011215_0818_7_tree_xgboost_binary_logits_and_1_linear_xgboost_binary_logits_with_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.61628
 
 #####################################################################
-## 7. the lasso, again ##############################################
+## 7. the logistic regression, and lasso, again #####################
 #####################################################################
 require(glmnet)
 ##############################
@@ -664,27 +664,79 @@ y.valid2 <- ifelse(as.integer(dt.valid2$PRED) == 1, 0, 1)
 
 x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID"), with = F])[, -1]
 
+##############################
+## 7.2 model lasso ###########
+##############################
 cv.lasso.out <- cv.glmnet(x = x.train
                           , y = y.train
                           , alpha = 1
                           , family = "binomial"
-                          , lambda = seq(1e-6, 1, by = 1e-4)
+                          , lambda = seq(1e-6, 1e-3, by = 1e-5)
                           , type.measure = "auc"
                           , nfolds = 10
 )
 
+cv.lasso.out$lambda.min
+# [1] 8.1e-05
+md.lasso <- glmnet(x = x.train
+                  , y= y.train
+                  , alpha = 1
+                  , family = "binomial"
+                  , lambda = cv.lasso.out$lambda.min)
 
+pred.valid1 <- predict(md.lasso, s = cv.lasso.out$lambda.min, newx = x.valid1)
+colAUC(pred.valid1, y.valid1)
+# 1
+# 0 vs. 1 0.7264308
+pred.valid2 <- predict(md.lasso, s = cv.lasso.out$lambda.min, newx = x.valid2)
+colAUC(pred.valid2, y.valid2)
+# 1
+# 0 vs. 1 0.6304754
 
+##############################
+## 7.3 model logistic regression
+##############################
+md.lr <- glm(PRED ~.
+             , family = binomial
+             , data = dt.train[, !c("ACCOUNT_ID"), with = F])
 
+pred.train <- predict(md.lr)
+colAUC(pred.train, y.train)
+# [,1]
+# 0 vs. 1 0.6134507
+pred.valid1 <- predict(md.lr, newdata = dt.valid1)
+colAUC(pred.valid1, y.valid1)
+# [,1]
+# 0 vs. 1 0.7264089
+pred.valid2 <- predict(md.lr, newdata = dt.valid2, type = "response")
+colAUC(pred.valid2, y.valid2)
+# [,1]
+# 0 vs. 1 0.6303594
 
+##############################
+## 7.4 submit
+##############################
+# lasso and the simple logistic regression outpus similar results, so use either
+# lasso
+pred.test <- predict(md.lasso, s = cv.lasso.out$lambda.min, newx = x.test)
+dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
+colnames(dt.submit) <- c("Account_ID", "Prediction")
+dim(dt.submit)
+# [1] 12935     2
+dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
+# [1] 7374    2
+write.csv(dt.submit, "submit/16_021215_0855_the_lasso_lr_with_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.61734
 
-
-
-
-
-
-
-
+################################
+## 7.5 ensemble with xgboost and submit
+##############################
+dt.submit.lasso <- dt.submit
+dt.submit.xgboost <- fread("submit/15_011215_0818_7_tree_xgboost_binary_logits_and_1_linear_xgboost_binary_logits_with_random_3in1_preprocess_valid1_valid2_.csv")
+dt.submit.ensemble <- data.table(Account_ID = dt.submit.xgboost$Account_ID
+                                 , Prediction = dt.submit.lasso$Prediction * 7 + dt.submit.xgboost$Prediction)
+dim(dt.submit.ensemble)
+# [1] 7374    2
+write.csv(dt.submit.ensemble, "submit/17_021215_0912_ensembled_xgboost_and_lasso_lr_with_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.62556
 
 
 

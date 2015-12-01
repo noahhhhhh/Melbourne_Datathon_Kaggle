@@ -10,6 +10,9 @@ require(caret)
 # load("../Datathon_Full_Dataset/transformed_non_overlap_Data.RData")
 # load("../Datathon_Full_Dataset/transformed_union_Data.RData")
 load("../Datathon_Full_Dataset/transformed_more_union_Data.RData")
+is.dup <- duplicated(dt.3in1[, c("UNIT", "ACCOUNT_ID"), with = F])
+dt.3in1 <- dt.3in1[!is.dup, with = T]
+
 #######################################
 ## 1.0 centre and scale ###############
 #######################################
