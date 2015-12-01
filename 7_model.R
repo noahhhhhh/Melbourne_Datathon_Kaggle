@@ -528,7 +528,7 @@ dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort
 write.csv(dt.submit, "submit/13_301115_1842_7_tree_xgboost_and_1_linear_xgboost_with_combined_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.61693
 
 #####################################################################
-## 6. try 3in1 random data on automated xgboost ################
+## 6. try 3in1 random data on automated xgboost #####################
 #####################################################################
 ##############################
 ## 6.1 train, valid, and test transform
@@ -645,5 +645,47 @@ dim(dt.submit)
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
 # [1] 7374    2
 write.csv(dt.submit, "submit/15_011215_0818_7_tree_xgboost_binary_logits_and_1_linear_xgboost_binary_logits_with_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.61628
+
+#####################################################################
+## 7. the lasso, again ##############################################
+#####################################################################
+require(glmnet)
+##############################
+## 7.1 train, valid, and test transform
+##############################
+x.train <- model.matrix(PRED ~., dt.train[, !c("ACCOUNT_ID"), with = F])[, -1]
+y.train <- ifelse(as.integer(dt.train$PRED) == 1, 0, 1)
+
+x.valid1 <- model.matrix(PRED ~., dt.valid1[, !c("ACCOUNT_ID"), with = F])[, -1]
+y.valid1 <- ifelse(as.integer(dt.valid1$PRED) == 1, 0, 1)
+
+x.valid2 <- model.matrix(PRED ~., dt.valid2[, !c("ACCOUNT_ID"), with = F])[, -1]
+y.valid2 <- ifelse(as.integer(dt.valid2$PRED) == 1, 0, 1)
+
+x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID"), with = F])[, -1]
+
+cv.lasso.out <- cv.glmnet(x = x.train
+                          , y = y.train
+                          , alpha = 1
+                          , family = "binomial"
+                          , lambda = seq(1e-6, 1, by = 1e-4)
+                          , type.measure = "auc"
+                          , nfolds = 10
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
