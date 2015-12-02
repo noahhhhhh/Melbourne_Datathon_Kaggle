@@ -91,4 +91,56 @@ dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort
 # [1] 7374    2
 write.csv(dt.submit, "submit/18_021215_2150_7_xgboost_binary_logits_with_more_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.63120
 
+#####################################################################
+## 2. rf on random 3in1 #############################################
+#####################################################################
+##############################
+## 2.1 train, valid, and test transform
+##############################
+require(xgboost)
+require(Ckmeans.1d.dp)
+x.train <- model.matrix(PRED ~., dt.train[, !c("ACCOUNT_ID"), with = F])[, -1]
+y.train <- dt.train$PRED
+dmx.train <- xgb.DMatrix(data =  x.train, label = y.train)
+
+x.valid1 <- model.matrix(PRED ~., dt.valid1[, !c("ACCOUNT_ID"), with = F])[, -1]
+y.valid1 <- dt.valid1$PRED
+dmx.valid1 <- xgb.DMatrix(data =  x.valid1, label = y.valid1)
+
+x.valid2 <- model.matrix(PRED ~., dt.valid2[, !c("ACCOUNT_ID"), with = F])[, -1]
+y.valid2 <- dt.valid2$PRED
+dmx.valid2 <- xgb.DMatrix(data =  x.valid2, label = y.valid2)
+
+x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID"), with = F])[, -1]
+
+##############################
+## 2.2 model
+##############################
+set.seed(1)
+md.rf <- randomForest(x = x.train
+                      , y = y.train
+                      , xtest = x.valid2
+                      , ytest = y.valid2
+                      , ntree = 1000
+                      , mtry = floor(sqrt(ncol(x.train)))
+                      , replace = T
+                      , nodesize = 100
+                      , importance = T
+                      )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

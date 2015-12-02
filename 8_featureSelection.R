@@ -4,6 +4,7 @@
 setwd("/Volumes/Data Science/Google Drive/data_science_competition/melbourne_datathon/Melbourne_Datathon_Kaggle/")
 rm(list = ls()); gc()
 require(data.table)
+require(plyr)
 require(dplyr)
 require(caret)
 require(caTools)
