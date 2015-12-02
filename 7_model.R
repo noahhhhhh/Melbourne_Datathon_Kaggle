@@ -588,8 +588,10 @@ for (i in 1:reps){
     }
     print(paste("rep", i, "- End"))
 }
+# average valid1 = 0.842147
+# average valid2 = 0.725920
 pred.test
-
+summary(pred.test)
 ##############################
 ## 6.3 submit
 ##############################

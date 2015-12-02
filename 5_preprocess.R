@@ -8,8 +8,8 @@ require(dplyr)
 require(caret)
 # load("../Datathon_Full_Dataset/transformedData.RData")
 # load("../Datathon_Full_Dataset/transformed_non_overlap_Data.RData")
-# load("../Datathon_Full_Dataset/transformed_union_Data.RData")
-load("../Datathon_Full_Dataset/transformed_more_union_Data.RData")
+load("../Datathon_Full_Dataset/transformed_union_Data.RData")
+# load("../Datathon_Full_Dataset/transformed_more_union_Data.RData")
 is.dup <- duplicated(dt.3in1[, c("UNIT", "ACCOUNT_ID"), with = F])
 dt.3in1 <- dt.3in1[!is.dup, with = T]
 
@@ -21,6 +21,68 @@ prep.centreScale <- preProcess(dt.3in1[, !c("ACCOUNT_ID"), with = F]
 dt.centreScale <- predict(prep.centreScale, newdata = dt.3in1)
 dim(dt.centreScale)
 # [1] 333999    133
+
+#######################################
+## 1.1 train, valid, and test set #####
+#######################################
+###########
+## train ##
+###########
+dt.train <- dt.centreScale[!UNIT %in% c("38_39_40" # valid set 1 related
+                                        , "20_21_22" # valid set 2 related
+                                        , "42_43_44", "43_44_45", "44_45_46") # test set related
+                           , with = T]
+dt.train[, UNIT := NULL]
+# dt.train[, ACCOUNT_ID := NULL]
+dt.train[, THIS_PROFIT_LOSS := NULL]
+str(dt.train)
+dim(dt.train)
+# [1] 283477     75
+
+############
+## valid1 ##
+############
+dt.valid1 <- dt.centreScale[UNIT == c("38_39_40"), with = T]
+dt.valid1[, UNIT := NULL]
+# dt.valid[, ACCOUNT_ID := NULL]
+dt.valid1[, THIS_PROFIT_LOSS := NULL]
+str(dt.valid1)
+dim(dt.valid1)
+# [1] 6791   75
+
+############
+## valid2 ##
+############
+dt.valid2 <- dt.centreScale[UNIT == c("20_21_22"), with = T]
+dt.valid2[, UNIT := NULL]
+# dt.valid[, ACCOUNT_ID := NULL]
+dt.valid2[, THIS_PROFIT_LOSS := NULL]
+str(dt.valid2)
+dim(dt.valid2)
+# [1] 7780   75
+# str(dt.valid2)
+
+##########
+## test ##
+##########
+dt.test <- dt.centreScale[UNIT == c("44_45_46"), with = T]
+dt.test[, UNIT := NULL]
+# dt.test[, ACCOUNT_ID := NULL]
+dt.test[, THIS_PROFIT_LOSS := NULL]
+dt.test[, PRED := NULL]
+str(dt.test)
+dim(dt.test)
+# [1] 12935    74
+
+#######################################
+## 3,0 save ###########################
+#######################################
+save(dt.train, file = "../Datathon_Full_Dataset/trainData_less.RData")
+save(dt.valid1, file = "../Datathon_Full_Dataset/valid1Data_less.RData")
+save(dt.valid2, file = "../Datathon_Full_Dataset/valid2Data_less.RData")
+save(dt.test, file = "../Datathon_Full_Dataset/testData_less.RData")
+
+
 
 #######################################
 ## 2.0 simple feature cleansing #######
