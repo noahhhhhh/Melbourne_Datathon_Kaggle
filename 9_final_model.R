@@ -134,7 +134,7 @@ write.csv(dt.submit, "submit/22_051215_2254_1_xgboost_sample_.3_cols_with_more_r
 
 
 ##############################
-## 1.3 model - xgboost
+## 1.3 model - xgboost - gbtree
 #############################
 eta <- rep(.025, 9)
 # max_depth <- c(8, 7, 7, 6, 5)
@@ -180,15 +180,86 @@ for (i in 1:reps){
 # average valid2 = 0.725920
 pred.test
 summary(pred.test)
+
+save(pred.valid1.xgb, file = "../Datathon_Full_Dataset/pred_valid1_xgb.RData")
+save(pred.valid2.xgb, file = "../Datathon_Full_Dataset/pred_valid2_xgb.RData")
+save(pred.test.xgb, file = "../Datathon_Full_Dataset/pred_test_xgb.RData")
+save(md.xgboost, file = "../Datathon_Full_Dataset/md_xgb_gbtree.RData")
+
+colAUC(pred.valid1.xgb, y.valid1)
+# [,1]
+# 0 vs. 1 0.8717821
+colAUC(pred.valid2.xgb, y.valid2)
+# [,1]
+# 0 vs. 1 0.7443788
+
+##############################
+## 1.3 model - xgboost - gblinear
+#############################
+eta <- rep(.025, 9)
+# max_depth <- c(8, 7, 7, 6, 5)
+# min.child <- c(5, 5, 5, 5, 5)
+subsample <- rep(.8, 9)
+colsample_bytree <- rep(.3, 9)
+nrounds <- rep(239, 9)
+
+reps <- 1
+models <- 9
+
+pred.valid1.xgb.linear <- rep(0, nrow(x.valid1))
+pred.valid2.xgb.linear <- rep(0, nrow(x.valid2))
+pred.test.xgb.linear <- rep(0, nrow(dtSampleSubmit))
+
+for (i in 1:reps){
+    print(paste("rep", i, "- Start"))
+    for(j in 1:models){
+        print(paste("------model", j, ": Start"))
+        # set.seed(1000 * i + 100 * j)
+        set.seed(j)
+        md.xgboost.linear <- xgb.train(data = dmx.train
+                                , objective = "binary:logistic"
+                                , params = list(nthread = 8
+                                                , booster = "gblinear" # linear
+                                                , eval_metric = "auc"
+                                                , eta = eta[j]
+                                                # , max_depth = max_depth[j]
+                                                , subsample = subsample[j]
+                                                , colsample_bytree = colsample_bytree[j])
+                                , watchlist = list(eval1 = dmx.valid1
+                                                   , eval2 = dmx.valid2
+                                                   , train = dmx.train)
+                                , nrounds = nrounds[j]
+                                , verbose = T)
+        pred.valid1.xgb.linear <- pred.valid1.xgb.linear + predict(md.xgboost, x.valid1) / models 
+        pred.valid2.xgb.linear <- pred.valid2.xgb.linear + predict(md.xgboost, x.valid2) / models
+        pred.test.xgb.linear <- pred.test.xgb.linear + predict(md.xgboost, x.test) / models
+        print(paste("------model", j, ": End"))
+    }
+    print(paste("rep", i, "- End"))
+}
+# [143]	eval1-auc:0.728967	eval2-auc:0.630897	train-auc:0.612640
+# [239]	eval1-auc:0.727975	eval2-auc:0.631165	train-auc:0.613446
+save(pred.valid1.xgb.linear, file = "../Datathon_Full_Dataset/pred_valid1_xgb_linear.RData")
+save(pred.valid2.xgb.linear, file = "../Datathon_Full_Dataset/pred_valid2_xgb_linear.RData")
+save(pred.test.xgb.linear, file = "../Datathon_Full_Dataset/pred_test_xgb_linear.RData")
+save(md.xgboost.linear, file = "../Datathon_Full_Dataset/md_xgb_gblinear.RData")
+
+colAUC(pred.valid1.xgb.linear, y.valid1)
+# [,1]
+# 0 vs. 1 0.8717821
+colAUC(pred.valid2.xgb.linear, y.valid2)
+# [,1]
+# 0 vs. 1 0.7443788
+
 ##############################
 ## 1.3 submit xgboost
 ##############################
-dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
+dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test.xgb)
 dim(dt.submit)
 # [1] 12935     2
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
 # [1] 7374    2
-write.csv(dt.submit, "submit/18_021215_2150_7_xgboost_binary_logits_with_more_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.63120
+write.csv(dt.submit, "submit/23_071215_0811_9_xgboost_2500_rounds_with_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.63165
 
 #####################################################################
 ## 2. rf on random 3in1 #############################################
