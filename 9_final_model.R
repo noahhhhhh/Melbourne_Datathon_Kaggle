@@ -194,7 +194,7 @@ colAUC(pred.valid2.xgb, y.valid2)
 # 0 vs. 1 0.7443788
 
 ##############################
-## 1.3 model - xgboost - gblinear
+## 1.4 model - xgboost - gblinear
 #############################
 eta <- rep(.025, 9)
 # max_depth <- c(8, 7, 7, 6, 5)
@@ -246,20 +246,21 @@ save(md.xgboost.linear, file = "../Datathon_Full_Dataset/md_xgb_gblinear.RData")
 
 colAUC(pred.valid1.xgb.linear, y.valid1)
 # [,1]
-# 0 vs. 1 0.8717821
+# 0 vs. 1 0.870309
 colAUC(pred.valid2.xgb.linear, y.valid2)
 # [,1]
-# 0 vs. 1 0.7443788
+# 0 vs. 1 0.7420239
+
 
 ##############################
 ## 1.3 submit xgboost
 ##############################
-dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test.xgb)
+dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = (pred.test.xgb + pred.test.xgb.linear) / 2)
 dim(dt.submit)
 # [1] 12935     2
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
 # [1] 7374    2
-write.csv(dt.submit, "submit/23_071215_0811_9_xgboost_2500_rounds_with_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.63165
+write.csv(dt.submit, "submit/29_071215_1743_9_gbtree_9_gblinear_with_random_3in1_preprocess_valid1_valid2_.csv", row.names = F) # 0.63165
 
 #####################################################################
 ## 2. rf on random 3in1 #############################################
