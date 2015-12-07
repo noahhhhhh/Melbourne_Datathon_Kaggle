@@ -56,11 +56,26 @@ dmx.valid2 <- xgb.DMatrix(data =  x.valid2, label = y.valid2)
 
 x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID"), with = F])[, -1]
 
-# test.knn <- knn(x.train
-#                 , x.test
-#                 , y.train
-#                 , k = 1
-#                 , prob = T)
+colTrain.knn <- knn(x.train
+                    , x.train
+                    , y.train
+                    , k = 1
+                    , prob = T)
+colValid1.knn <- knn(x.train
+                    , x.valid1
+                    , y.train
+                    , k = 1
+                    , prob = T)
+colValid2.knn <- knn(x.train
+                    , x.valid2
+                    , y.train
+                    , k = 1
+                    , prob = T)
+colTest.knn <- knn(x.train
+                    , x.test
+                    , y.train
+                    , k = 1
+                    , prob = T)
 
 ##############################
 ## 1. ensemble ###############
@@ -186,8 +201,10 @@ dim(dt.submit)
 # [1] 12935     2
 dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T)
 # [1] 7374    2
-write.csv(dt.submit, "submit/32_071215_2203_bagging_.csv", row.names = F) # 0.50377
+write.csv(dt.submit, "submit/32_071215_2203_bagging_.csv", row.names = F) # 0.63756
 
+# introduce .437 as new accoutns' score
+dt.submit
 
 
 
