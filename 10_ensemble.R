@@ -55,22 +55,22 @@ y.valid2 <- ifelse(as.integer(dt.valid2$PRED) == 1, 0, 1)
 dmx.valid2 <- xgb.DMatrix(data =  x.valid2, label = y.valid2)
 
 x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID"), with = F])[, -1]
-
-colTrain.knn <- knn(x.train
-                    , x.train
-                    , y.train
-                    , k = 1
-                    , prob = T)
-colValid1.knn <- knn(x.train
-                    , x.valid1
-                    , y.train
-                    , k = 1
-                    , prob = T)
-colValid2.knn <- knn(x.train
-                    , x.valid2
-                    , y.train
-                    , k = 1
-                    , prob = T)
+# 
+# colTrain.knn <- knn(x.train
+#                     , x.train
+#                     , y.train
+#                     , k = 1
+#                     , prob = T)
+# colValid1.knn <- knn(x.train
+#                     , x.valid1
+#                     , y.train
+#                     , k = 1
+#                     , prob = T)
+# colValid2.knn <- knn(x.train
+#                     , x.valid2
+#                     , y.train
+#                     , k = 1
+#                     , prob = T)
 colTest.knn <- knn(x.train
                     , x.test
                     , y.train
@@ -170,45 +170,66 @@ save(dt.test.ensemble, file = "../Datathon_Full_Dataset/testEnsemble.RData")
 ##################################
 ## ensemble model - blending #####
 ##################################
-## lr ##
-md.blend.lr <- glm(PRED ~.
-                   , family = binomial
-                   , data = dt.train.ensemble)
+setwd("/Volumes/Data Science/Google Drive/data_science_competition/melbourne_datathon/Melbourne_Datathon_Kaggle/")
+rm(list = ls()); gc();
+require(data.table)
+load("../Datathon_Full_Dataset/trainEnsemble.RData")
+load("../Datathon_Full_Dataset/valid1Ensemble.RData")
+load("../Datathon_Full_Dataset/valid2Ensemble.RData")
+load("../Datathon_Full_Dataset/testEnsemble.RData")
 
-colAUC(predict(md.blend.lr, newdata = dt.train.ensemble, type = "response"), dt.train.ensemble$PRED)
-# [,1]
-# 0 vs. 1 0.871239
-colAUC(predict(md.blend.lr, newdata = dt.valid1.ensemble, type = "response"), dt.valid1.ensemble$PRED)
-# [,1]
-# 0 vs. 1 0.8971305
-colAUC(predict(md.blend.lr, newdata = dt.valid2.ensemble, type = "response"), dt.valid2.ensemble$PRED)
-# [,1]
-# 0 vs. 1 0.7876071
+load("../Datathon_Full_Dataset/trainData.RData")
+load("../Datathon_Full_Dataset/valid1Data.RData")
+load("../Datathon_Full_Dataset/valid2Data.RData")
+load("../Datathon_Full_Dataset/testData.RData")
 
-# try submit
-pred.test <- predict(md.blend.lr, newdata = dt.test.ensemble, type = "response")
-dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
+dtSampleSubmit <- fread("../data_files/sample_submission_bet_size.csv")
+dtSampleSubmit[, Prediction := NULL]
+setnames(dtSampleSubmit, "Account_ID")
+
+
+dt.test.ensemble[, rf:= 1 - rf]
+# try simple blending with rf[, 2]
+pred.bagging <- rowSums(dt.test.ensemble) # no weight!
+pred.bagging <- (dt.test.ensemble$rf * .2
+                 + dt.test.ensemble$nnet * .25
+                 + dt.test.ensemble$lasso * .05
+                 + dt.test.ensemble$lr * .1
+                 + dt.test.ensemble$xgb.gbtree * .3
+                 + dt.test.ensemble$xgb.gblinear * .1) # has weight!
+
+dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.bagging)
 dim(dt.submit)
 # [1] 12935     2
-dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T)
+dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T, sort = F)
 # [1] 7374    2
-write.csv(dt.submit, "submit/31_071215_2203_blending_lr_.csv", row.names = F) # 0.50377
 
-# try add up 
-pred.test <-  colTest.rf + colTest.nnet + colTest.lasso + colTest.lr + colTest.xgb.gbtree + colTest.xgb.gblinear
-dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.test)
-dim(dt.submit)
-# [1] 12935     2
-dt.submit <- merge(dtSampleSubmit, dt.submit, by = "Account_ID", all.x = T)
-# [1] 7374    2
-write.csv(dt.submit, "submit/32_071215_2203_bagging_.csv", row.names = F) # 0.63756
+# set the scores of new accts to .437 * 2 * original prediction
+trainAcct <- unique(dt.train$ACCOUNT_ID)
+valid1Acct <- unique(dt.valid1$ACCOUNT_ID)
+valid2Acct <- unique(dt.valid2$ACCOUNT_ID)
 
-# introduce .437 as new accoutns' score
-dt.submit
+existingAcct <- c(trainAcct, valid1Acct, valid2Acct)
+existingAcct <- unique(existingAcct)
+length(existingAcct)
+# [1] 20841
 
+newAcct <- setdiff(dt.submit$Account_ID, existingAcct)
 
+# Prediction_New <- rnorm(1001, mean = .43, sd = .1)
+Prediction_New <- .437
+dt.newAcct <- data.table(Account_ID = newAcct, Prediction_New = Prediction_New)
+# bestSub[, Prediction := Prediction/14]
 
+newSub <- merge(dt.submit, dt.newAcct, by = "Account_ID", all.x = T)
+newSub[, Prediction_New := Prediction * 2 * Prediction_New]
+newSub[, Prediction := ifelse(is.na(newSub$Prediction_New), newSub$Prediction, newSub$Prediction_New)]
+newSub[, Prediction_New := NULL]
+newSub[Prediction == .437, with = T] # 0.64343
+write.csv(newSub, "submit/42_081215_1743_6_model_bagging_with_weights_20_25_05_10_30_10.csv", row.names = F) # 0.63165
 
+# try add knn
+dt.test.ensemble[, knn := colTest.knn]
 
 
 
