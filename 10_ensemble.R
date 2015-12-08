@@ -230,7 +230,7 @@ write.csv(newSub, "submit/42_081215_1743_6_model_bagging_with_weights_20_25_05_1
 
 # try add knn
 dt.test.ensemble[, knn := colTest.knn]
-
+save(dt.test.ensemble, file = "../Datathon_Full_Dataset/testEnsemble_with_knn.RData")
 
 
 
