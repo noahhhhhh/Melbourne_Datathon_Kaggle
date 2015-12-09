@@ -71,11 +71,11 @@ x.test <- model.matrix(~., dt.test[, !c("ACCOUNT_ID"), with = F])[, -1]
 #                     , y.train
 #                     , k = 1
 #                     , prob = T)
-colTest.knn <- knn(x.train
-                    , x.test
-                    , y.train
-                    , k = 1
-                    , prob = T)
+# colTest.knn <- knn(x.train
+#                     , x.test
+#                     , y.train
+#                     , k = 1
+#                     , prob = T)
 
 ##############################
 ## 1. ensemble ###############
@@ -191,12 +191,12 @@ setnames(dtSampleSubmit, "Account_ID")
 dt.test.ensemble[, rf:= 1 - rf]
 # try simple blending with rf[, 2]
 pred.bagging <- rowSums(dt.test.ensemble) # no weight!
-pred.bagging <- (dt.test.ensemble$rf * .2
-                 + dt.test.ensemble$nnet * .25
+pred.bagging <- (dt.test.ensemble$rf * .10
+                 + dt.test.ensemble$nnet * .30
                  + dt.test.ensemble$lasso * .05
-                 + dt.test.ensemble$lr * .1
-                 + dt.test.ensemble$xgb.gbtree * .3
-                 + dt.test.ensemble$xgb.gblinear * .1) # has weight!
+                 + dt.test.ensemble$lr * .05
+                 + dt.test.ensemble$xgb.gbtree * .30
+                 + dt.test.ensemble$xgb.gblinear * .15) # has weight!
 
 dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.bagging)
 dim(dt.submit)
