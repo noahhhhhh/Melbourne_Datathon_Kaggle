@@ -195,7 +195,7 @@ pred.bagging <- (dt.test.ensemble$rf * .10
                  + dt.test.ensemble$nnet * .30
                  + dt.test.ensemble$lasso * .05
                  + dt.test.ensemble$lr * .05
-                 + dt.test.ensemble$xgb.gbtree * .30
+                 + dt.test.ensemble$xgb.gbtree * .35
                  + dt.test.ensemble$xgb.gblinear * .15) # has weight!
 
 dt.submit <- data.table(Account_ID = dt.test$ACCOUNT_ID, Prediction = pred.bagging)
@@ -232,11 +232,12 @@ write.csv(newSub, "submit/42_081215_1743_6_model_bagging_with_weights_20_25_05_1
 dt.test.ensemble[, knn := colTest.knn]
 save(dt.test.ensemble, file = "../Datathon_Full_Dataset/testEnsemble_with_knn.RData")
 
+load("../Datathon_Full_Dataset/testEnsemble_with_knn.RData")
+dt.test.ensemble[, knn := NULL]
+dt.test.ensemble <- data.table(Account_ID = dt.test$ACCOUNT_ID, dt.test.ensemble)
+dt.test.ensemble <- merge(dt.test.ensemble, dtSampleSubmit, by = "Account_ID")
 
-
-
-
-
+save(dt.test.ensemble, file = "../Datathon_Full_Dataset/dtTestEnsemble.RData")
 
 
 
