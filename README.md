@@ -34,6 +34,7 @@ The objective is to determine if betting is just guessing, or if past performanc
 23. **(29/11/15) DONE -** try non-overlapping 3in1 and randomly generate non-overlapping 3in1 (137, 245, ...)
 24. **(30/11/15) DONE -** cv and ensemble with xgb regression
 24. **(01/12/15) DONE -** cv and ensemble with logistic regression
+25. **(09/12/15) DONE -** blended 6 models with weights (rf: .10; nnet: .30; lasso: .05; lr : .05; xbgtree: .35; xgblinear: .15), also applied (0.4367089 * 2 * original prediction) to new accts. -- AUC: 0.64596
 
 ###Feature Engineering
 1. **(09/11/15) not done yet -** 2 Features indicating whether the COUNTRY_OF_RESIDENCE is the same as where either of the opponent is from would be useful. E.g. China vs Japan would have two features like **IS_CHINESE** and **IS_JAPANESE**. Also, additional similar features like  **TIMES_PREV_BET_ON_CHINA_AND_WON / LOSS** and  **TIMES_PREV_BET_ON_JAPAN_AND_WON / LOSS**, and  **TIMES_PREV_BET_ON_CHINA_GAMES** and  **TIMES_PREV_BET_ON_JAPAN_GAMES**.
