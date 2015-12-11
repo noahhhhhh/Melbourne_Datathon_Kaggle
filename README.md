@@ -1,4 +1,4 @@
-# Melbourne_Datathon_Kaggle
+# Melbourne_Datathon_Kaggle (We won the 1st prize!!!)
 [Melbourne Datathon Kaggle Competetion](https://inclass.kaggle.com/c/melbourne-datathon-2015/)  
 This competition is for those who entered the Data Science Melbourne 2015 Datathon.  
 
@@ -7,6 +7,19 @@ You will already have the data for all games upto the semi-finals and finals. Th
 We provide the list of Account_IDs to make predictions for, along with some limited features for the final 3 games that you may make use of.  
 
 The objective is to determine if betting is just guessing, or if past performance can be indicative of future performance. We expect this to be very hard, and will be impressed if anyone can come up with an algorithm that is better than a random number generator!  
+### Lessons learnt from this competition
+1. Feature engineering worths taking more time (70%), and it is the key to win the competition.
+2. It would be very useful to have a few sessions of brain storming on what features are needed, how the data should be transformed.
+3. The benchmark did help a lot, especially the -5 new punters one.
+4. It would be best to start the competetion as early as possible, and adapt the idea, strategy, and key technics along the way.
+5. Nice documentation is a great way to keep track of your idea, progress, and process.
+6. A well organised workspace makes things go more efficiently.
+7. Have a great team leader (like Ivan) is necessary.
+8. Start the competetion individually, and later combine the work together as a team will defintely improve the score significantly (it is a better strategy than the one that enter the competetion as a team). Ivan and I both have different ideas and choices on the feature engineering and modelling. When our work is combined (bagged), the publich LB score improved from .652 to .660 (this is a huge jump).
+9. Communication is always the No.1 (Ivan and I did share a lot of ideas along the way (most of the times it was me asking bunches of questions to him)).
+10. Data exploration worths taking the second biggest proportion of the time.
+11. Always learning!
+
 
 ###Todo/Memo
 1. **(09/11/15) DONE -** As the features are accumulated, needs to give an EVENT_SEQ to each game based on the MATCH (EVENT_ID does not alway reflect the sequence).
